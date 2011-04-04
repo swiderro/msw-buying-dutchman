@@ -146,13 +146,11 @@ public class BuyingDutchman extends GuiAgent {
 	}	
 
 	private void waitAndBuy(String auctionNr, String auctioneer, float bid) {
-		// TODO Auto-generated method stub
-		// There should be a hashtable containing all auctions agent is waiting for
-		// A key fo the hashtable is two dimensial - auctionNr, auctioneer.
-		// Every time an auction the agent is waiting for changes price, the hashtable
-		// should be tested for having a higher bid. Listener?
-		// No. The solution is to immediatly pass bid to the auctioneer, which 
-		// saves the bid, but hides it. It works as a proposition now
+		propose(
+			auctionNr
+			, auctioneer
+			, bid
+		);
 	}
 
 	/**

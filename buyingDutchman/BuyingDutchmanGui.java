@@ -728,7 +728,7 @@ public class BuyingDutchmanGui extends JFrame {
 							jTAAuctionDescriptionInfo.getText().trim()
 							, getJCBCategory().getSelectedItem().toString()
 							, getJCBSubCategory().getSelectedItem().toString()
-						); // TODO get it from jPAuction
+						);
 						AuctionDetails ad = new AuctionDetails(
 							jTFStartPriceInt.getText().trim()
 							, jTFStartPriceDec.getText().trim()
@@ -736,8 +736,10 @@ public class BuyingDutchmanGui extends JFrame {
 							, jTFEndPriceDec.getText().trim()
 							, ticks
 							, title
+							, jCBAutionType.getSelectedItem().toString()
 						);
-						Auction a = new Auction(ad, ai, myAgent.getNextAuctionNumber(), myAgent.getLocalName());
+						AuctionFactory af = new AuctionFactory();
+						Auction a = af.createAuction(ad, ai, myAgent.getNextAuctionNumber(), myAgent.getLocalName());
 						e.addParameter(a);
 						myAgent.postGuiEvent(e);
 					}
@@ -962,7 +964,7 @@ public class BuyingDutchmanGui extends JFrame {
 	
 	private JComboBox getJCBAutionType() {
 		if (jCBAutionType == null) {
-			jCBAutionType = new JComboBox((Object [])BDC.AuctionType);
+			jCBAutionType = new JComboBox((Object [])BDC.AuctionTypes);
 		}
 		return jCBAutionType;
 	}
