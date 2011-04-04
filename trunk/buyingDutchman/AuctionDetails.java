@@ -13,9 +13,10 @@ public class AuctionDetails implements Serializable{
 	private final String Title;
 	private int TicksLeft;
 	private final int StartTicks;
+	private String Type;
 	
 	public AuctionDetails(String startPriceInt, String startPriceDec, String endPriceInt,
-			String endPriceDec, int ticks, String title) {
+			String endPriceDec, int ticks, String title, String type) {
 		String i = endPriceDec;
 		if (i == null || i.equalsIgnoreCase("") || i.equalsIgnoreCase("0") || i.equalsIgnoreCase("00"))
 			i = "00";
@@ -72,7 +73,8 @@ public class AuctionDetails implements Serializable{
 		PriceDec = StartPriceDec;
 		Title = title;
 		StartTicks = ticks;
-		TicksLeft = ticks;		
+		TicksLeft = ticks;
+		Type = type;
 	}
 	public String getStartPriceInt() {
 		return StartPriceInt;
@@ -109,5 +111,8 @@ public class AuctionDetails implements Serializable{
 	}
 	public int getStartTicks() {
 		return StartTicks;
+	}
+	public String getType() {
+		return Type;
 	}
 }

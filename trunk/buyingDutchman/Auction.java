@@ -142,10 +142,17 @@ public class Auction implements Serializable {
 		return auctioneer+BDC.POSTFIX+an;
 	}
 	public String getMaxBid() {
-		if (maxBid >=0) {			
-			return Float.toString(maxBid);
-		} else
-			return BDC.NONESTRING;
+		if (maxBid >=0) {
+			if (isFinished())
+				return Float.toString(maxBid);
+			String type = getType();
+			for (String s : BDC.ExplicitAuctionTypes) {
+				if (type.equalsIgnoreCase(s)) {
+					return Float.toString(maxBid);
+				}
+			}
+		}
+		return BDC.NONESTRING;
 	}
 	public float getMaxBidFloat() {
 		return maxBid;
@@ -159,15 +166,19 @@ public class Auction implements Serializable {
 	public Object getColumnValue(int col) {
 		switch (col) {
 		case 0: return getAN();
-		case 1: return getAuctioneer();
-		case 2: return getCategory();
-		case 3: return getSubCategory();
-		case 4: return getTicksLeft()/BDC.TICK;
-		case 5: return getPriceInt()+BDC.POINT+getPriceDec();
-		case 6: return getMaxBid();
-		case 7: return getTitle();
+		case 1: return getType();
+		case 2: return getAuctioneer();
+		case 3: return getCategory();
+		case 4: return getSubCategory();
+		case 5: return getTicksLeft()/BDC.TICK;
+		case 6: return getPriceInt()+BDC.POINT+getPriceDec();
+		case 7: return getMaxBid();
+		case 8: return getTitle();
 		}
 		return null;
+	}
+	private String getType() {
+		return ad.getType();
 	}
 	private String getSubCategory() {
 		return ai.getSubCategory().toString();
@@ -178,14 +189,15 @@ public class Auction implements Serializable {
 	public Object getFinishedColumnValue(int col) {
 		switch (col) {
 		case 0: return getAN();
-		case 1: return getAuctioneer();
-		case 2: return getCategory();
-		case 3: return getSubCategory();
-		case 4: return getTicksLeft()/BDC.TICK;
-		case 5: return getPriceInt()+BDC.POINT+getPriceDec();
-		case 6: return getMaxBid();
-		case 7: return getMaxBidder();
-		case 8: return getTitle();
+		case 1: return getType();
+		case 2: return getAuctioneer();
+		case 3: return getCategory();
+		case 4: return getSubCategory();
+		case 5: return getTicksLeft()/BDC.TICK;
+		case 6: return getPriceInt()+BDC.POINT+getPriceDec();
+		case 7: return getMaxBid();
+		case 8: return getMaxBidder();
+		case 9: return getTitle();
 		}
 		return null;
 	}

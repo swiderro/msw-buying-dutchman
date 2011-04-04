@@ -5,16 +5,16 @@ import java.util.HashMap;
 public final class BDC {
 	//BuyingDutchman Consts
 	public static final String[] AUCTIONSCOLUMNNAMES = {
-		"# aukcji", "Wystawca", "Kategoria", "Podkategoria", "Pozo. czas", "Cena", "Max oferta", "Tytu³"		
+		"# aukcji", "Typ", "Wystawca", "Kategoria", "Podkategoria", "Pozo. czas", "Cena", "Max oferta", "Tytu³"		
 	};
 	public static final String[] FINISHEDAUCTIONSCOLUMNNAMES = {
-		"# aukcji", "Wystawca", "Kategoria", "Podkategoria", "Pozo. czas", "Cena", "Max oferta", "Oferent", "Tytu³"		
+		"# aukcji", "Typ", "Wystawca", "Kategoria", "Podkategoria", "Pozo. czas", "Cena", "Max oferta", "Oferent", "Tytu³"		
 	};
 	public static final int[] AUCTIONSCOLUMNWIDTH = {
-		50, 60, 60, 60, 60, 60, 60, 60, 210
+		50, 60, 60, 60, 60, 60, 60, 60, 60, 210
 	};
 	public static final int[] FINISHEDAUCTIONSCOLUMNWIDTH = {
-		50, 60, 60, 60, 60, 60, 60, 70, 200
+		50, 60, 60, 60, 60, 60, 60, 60, 70, 200
 	};
 	public static final String BDONTO = "bd-ontology";
 	public static final String SDTYPELISTENER = "bd-agent";
@@ -128,12 +128,15 @@ public final class BDC {
 		return (String[]) getCategorySubcategory().get(category);
 	}
 	//AUCTION TYPES
-	private static final String DUTCH = "Holenderska";
-	private static final String ENGLISH = "Angielska";
-	private static final String SECOND_PRICE = "Drugiej ceny";
-	private static final String PRZETARG = "Przetarg";
-	public static final String[] AuctionType = {
-		DUTCH, ENGLISH, SECOND_PRICE, PRZETARG
+	public static final String DUTCH = "Holenderska";
+	public static final String ENGLISH = "Angielska";
+	public static final String SECOND_PRICE = "Drugiej ceny";
+	public static final String BIDDING = "Przetarg";
+	public static final String[] AuctionTypes = {
+		DUTCH, ENGLISH, SECOND_PRICE, BIDDING
+	};
+	public static final String[] ExplicitAuctionTypes = {
+		ENGLISH, BIDDING
 	};
 }
 
