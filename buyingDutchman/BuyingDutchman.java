@@ -55,6 +55,8 @@ public class BuyingDutchman extends GuiAgent {
 	private AbstractTableModel bdftm;
 	/** A flag used for refreshing displayed finished auctions table*/
 	private boolean refreshFinishedAuctionTable;
+	/** Auctions the agent is going to bid*/
+	private Hashtable waitAndBuyAuctions;
 	
 	protected void setup() {
 		//Field initialization
@@ -64,6 +66,7 @@ public class BuyingDutchman extends GuiAgent {
 		shownAuctions = new Hashtable();
 		shownAuctionsRowNumber = new Vector();
 		finishedAuctions = new Hashtable();
+		waitAndBuyAuctions = new Hashtable();
 		finishedAuctionsRowNumber = new Vector();
 		nextAuctionNumber = 0;
 		refreshAuctionsTable = false;
@@ -146,11 +149,14 @@ public class BuyingDutchman extends GuiAgent {
 	}	
 
 	private void waitAndBuy(String auctionNr, String auctioneer, float bid) {
-		propose(
-			auctionNr
-			, auctioneer
-			, bid
-		);
+		Auction a = (Auction) shownAuctions.get(auctioneer+BDC.POSTFIX+auctionNr);
+		if (a != null) {
+			if (bid >= a.getPrice())
+				propose(auctionNr, auctioneer, bid);				
+			else
+				waitAndBuyAuctions.put(auctioneer+BDC.POSTFIX+auctionNr, bid);			
+		} else
+			return;
 	}
 
 	/**
@@ -477,6 +483,10 @@ public class BuyingDutchman extends GuiAgent {
 							, new Integer(content[j+3]).intValue()
 							, content[j+4]
 						);
+						Object bid = waitAndBuyAuctions.get(sender + BDC.POSTFIX + content[j]);
+						if (bid != null && Float.valueOf(bid.toString()) <= aa.getPrice()) {
+							propose(content[j], sender, Float.valueOf(bid.toString()));							
+						}
 						setRefreshAuctionsTable(true);
 					} else {
 						ACLMessage req = getRequestMsg();
@@ -510,6 +520,7 @@ public class BuyingDutchman extends GuiAgent {
 					selection = (String) shownAuctionsRowNumber.get(i);
 				for (int j = 1; j < content.length; j+=1) {
 					Auction a = (Auction) shownAuctions.remove(sender + BDC.POSTFIX + content[j]);
+					waitAndBuyAuctions.remove(sender + BDC.POSTFIX + content[j]);
 					if ( a!=null ) {
 						if (
 							a.getAuctioneer().equalsIgnoreCase(getLocalName())

@@ -11,4 +11,12 @@ public class SecondPriceAuction extends Auction {
 	 */
 	private static final long serialVersionUID = 1L;
 
+	@Override
+	public String getMaxBid() {
+		if (maxBid >=0 && isFinished())
+			return Float.toString(maxBid);		
+		else
+			return BDC.NONESTRING;
+	}
+
 }
