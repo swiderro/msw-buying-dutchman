@@ -2,7 +2,7 @@ package buyingDutchman;
 
 import java.io.Serializable;
 
-public class Auction implements Serializable {	
+public abstract class Auction implements Serializable {	
 	private static final long serialVersionUID = 1L;
 	private final AuctionDetails ad;
 	private final AuctionItem ai;
@@ -15,7 +15,7 @@ public class Auction implements Serializable {
 	private float reductionStep;
 	private float price;
 	private float endPrice;
-	private float maxBid;
+	protected float maxBid;
 	/**
 	 * @param ad
 	 * @param ai
@@ -141,19 +141,7 @@ public class Auction implements Serializable {
 	public String getAuctioneerAN() {
 		return auctioneer+BDC.POSTFIX+an;
 	}
-	public String getMaxBid() {
-		if (maxBid >=0) {
-			if (isFinished())
-				return Float.toString(maxBid);
-			String type = getType();
-			for (String s : BDC.ExplicitAuctionTypes) {
-				if (type.equalsIgnoreCase(s)) {
-					return Float.toString(maxBid);
-				}
-			}
-		}
-		return BDC.NONESTRING;
-	}
+	public abstract String getMaxBid();
 	public float getMaxBidFloat() {
 		return maxBid;
 	}
@@ -177,7 +165,7 @@ public class Auction implements Serializable {
 		}
 		return null;
 	}
-	private String getType() {
+	protected String getType() {
 		return ad.getType();
 	}
 	private String getSubCategory() {

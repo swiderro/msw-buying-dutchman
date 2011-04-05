@@ -11,4 +11,12 @@ public class Bidding extends Auction {
 		super(AD, AI, AN, Auctioneer);
 	}
 
+	@Override
+	public String getMaxBid() {
+		if (maxBid >=0)
+			return Float.toString(maxBid);		
+		else
+			return BDC.NONESTRING;
+	}
+
 }
