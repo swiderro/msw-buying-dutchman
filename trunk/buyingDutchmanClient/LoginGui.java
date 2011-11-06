@@ -1,4 +1,4 @@
-package buyingDutchman;
+package buyingDutchmanClient;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
@@ -43,9 +43,9 @@ public class LoginGui extends JFrame{
 	private static final String LOGINBUTTON = "Zaloguj";  
 	private static final String LOGINTEXTFIELDINFO = "Login info";  
 	//AGENT CONSTS
-	private static final String AGENTNAME = "BuyingDutchman";
+	private static final String AGENTNAME = "BuyingDutchmanAgent";
 	private static final String SEPARATOR_1 = ":";	
-	private static final String PACKAGENAME = "buyingDutchman";
+	private static final String PACKAGENAME = "buyingDutchmanClient";
 	private static final String SEPARATOR_2 = ".";
 	 	
 	/**

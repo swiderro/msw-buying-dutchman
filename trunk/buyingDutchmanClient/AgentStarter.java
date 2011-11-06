@@ -1,4 +1,4 @@
-package buyingDutchman;
+package buyingDutchmanClient;
 
 import java.awt.EventQueue;
 

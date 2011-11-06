@@ -1,6 +1,9 @@
-package buyingDutchman;
+package auctions;
 
 import java.io.Serializable;
+
+import buyingDutchmanClient.BDC;
+import buyingDutchmanClient.BDC.AuctionTypes;
 
 public class AuctionDetails implements Serializable{
 	private static final long serialVersionUID = 1L;
@@ -13,10 +16,10 @@ public class AuctionDetails implements Serializable{
 	private final String Title;
 	private int TicksLeft;
 	private final int StartTicks;
-	private String Type;
+	private AuctionTypes Type;
 	
 	public AuctionDetails(String startPriceInt, String startPriceDec, String endPriceInt,
-			String endPriceDec, int ticks, String title, String type) {
+			String endPriceDec, int ticks, String title, BDC.AuctionTypes type) {
 		String i = endPriceDec;
 		if (i == null || i.equalsIgnoreCase("") || i.equalsIgnoreCase("0") || i.equalsIgnoreCase("00"))
 			i = "00";
@@ -112,7 +115,7 @@ public class AuctionDetails implements Serializable{
 	public int getStartTicks() {
 		return StartTicks;
 	}
-	public String getType() {
+	public AuctionTypes getType() {
 		return Type;
 	}
 }
