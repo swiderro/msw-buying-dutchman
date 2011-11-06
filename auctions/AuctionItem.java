@@ -1,4 +1,4 @@
-package buyingDutchman;
+package auctions;
 
 import java.io.Serializable;
 
@@ -8,7 +8,7 @@ public class AuctionItem implements Serializable {
 	private String Category;
 	private String SubCategory;
 	
-	AuctionItem(String itemDescription, String category, String subCategory){		
+	public AuctionItem(String itemDescription, String category, String subCategory){		
 		this.ItemDescription = itemDescription;
 		this.Category = category;		
 		this.SubCategory = subCategory;

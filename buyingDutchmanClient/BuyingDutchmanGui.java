@@ -1,38 +1,173 @@
-package buyingDutchman;
+package buyingDutchmanClient;
 
 import jade.gui.GuiEvent;
-import javax.swing.JFrame;
-import java.awt.Dimension;
-import javax.swing.JPanel;
+
 import java.awt.BorderLayout;
-import java.awt.GridBagLayout;
-import java.awt.GridBagConstraints;
-import javax.swing.DefaultListSelectionModel;
-import javax.swing.JTabbedPane;
-import javax.swing.JScrollPane;
-import javax.swing.JTable;
-import javax.swing.JTextArea;
-import javax.swing.JButton;
-import javax.swing.ListSelectionModel;
+import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
-import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
+
+import javax.swing.DefaultListSelectionModel;
+import javax.swing.JButton;
+import javax.swing.JComboBox;
+import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTabbedPane;
+import javax.swing.JTable;
+import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.PlainDocument;
-import javax.swing.JComboBox;
+
+import auctions.Auction;
+import auctions.AuctionDetails;
+import auctions.AuctionFactory;
+import auctions.AuctionItem;
 
 
 public class BuyingDutchmanGui extends JFrame {
 
-	private BuyingDutchman myAgent;
+	private class FinishedAuctionsListListener implements ListSelectionListener {
+
+		@Override
+		public void valueChanged(ListSelectionEvent arg0) {
+			if (!arg0.getValueIsAdjusting()) {
+				Auction a = myAgent.getFinishedAuction(((DefaultListSelectionModel)arg0.getSource()).getMaxSelectionIndex());
+				if (a != null) {
+					jTAFinishedAuctionDescription.setText(a.getAI().getItemDescription());
+				} else {
+					jTAFinishedAuctionDescription.setText(null);
+				}
+			}
+		}
+
+	}
+
+	private class ShownAuctionsListListener implements ListSelectionListener {
+
+		@Override
+		public void valueChanged(ListSelectionEvent arg0) {
+			if (!arg0.getValueIsAdjusting()) {
+				Auction a = myAgent.getShownAuction(((DefaultListSelectionModel)arg0.getSource()).getMaxSelectionIndex());
+				if (a != null) {
+					jTFAuctioneer.setText(a.getAuctioneer()); 
+					jTFAuctionNr.setText(a.getAN());
+					jTAAuctionDescription.setText(a.getAI().getItemDescription());
+				} else {
+					jTFAuctioneer.setText(null);
+					jTFAuctionNr.setText(null);
+					jTAAuctionDescription.setText(null);
+				}
+			}
+		}
+
+	}
+
+	private class WindowClose implements WindowListener {
+		@Override
+		public void windowClosing(WindowEvent e) {
+			GuiEvent f = new GuiEvent(this, BDC.GUICLOSE);
+			myAgent.postGuiEvent(f);
+		}
+		@Override
+		public void windowActivated(WindowEvent e) {}
+		@Override
+		public void windowClosed(WindowEvent e) {}
+		@Override
+		public void windowDeactivated(WindowEvent e) {}
+		@Override
+		public void windowDeiconified(WindowEvent e) {}
+		@Override
+		public void windowIconified(WindowEvent e) {}
+		@Override
+		public void windowOpened(WindowEvent e) {}		
+	}
+
+	private class ActionProposition implements ActionListener {
+
+		@Override
+		public void actionPerformed(ActionEvent arg0) {
+			GuiEvent e = new GuiEvent(jBProposition, BDC.GUIPROPOSITION);
+			e.addParameter(jTFAuctionNr.getText().trim());
+			e.addParameter(jTFAuctioneer.getText().trim());
+			e.addParameter(jTFBidPriceInt.getText().trim()+BDC.FPOINT+jTFBidPriceDec.getText().trim());
+			myAgent.postGuiEvent(e);
+		}
+
+	}
+
+	private class ActionBuyNow implements ActionListener {
+
+		@Override
+		public void actionPerformed(ActionEvent arg0) {
+			String auctioneer = jTFAuctioneer.getText().trim();
+			String auctionNr = jTFAuctionNr.getText().trim();
+			GuiEvent e = new GuiEvent(jBBuyNow, BDC.GUIBUYNOW);
+			e.addParameter(auctioneer);
+			e.addParameter(auctionNr);
+			myAgent.postGuiEvent(e);
+		}
+		
+	}
+
+	private class ActionWaitAndBuy implements ActionListener {
+
+		@Override
+		public void actionPerformed(ActionEvent arg0) {
+			GuiEvent e = new GuiEvent(jBWaitAndBuy, BDC.GUIWAITBUY);
+			e.addParameter(jTFAuctionNr.getText().trim());
+			e.addParameter(jTFAuctioneer.getText().trim());
+			e.addParameter(jTFBidPriceInt.getText().trim()+BDC.FPOINT+jTFBidPriceDec.getText().trim());
+			myAgent.postGuiEvent(e);
+		}
+
+	}
+
+	private class ActionAuction implements ActionListener {
+
+		@Override
+		public void actionPerformed(ActionEvent ev) {
+			int ticks = countTicks();
+			float priceRange = calculatePriceRange();
+			String title = jTFAuctionTitle.getText().trim();
+			if (ticks > 0 && priceRange > 0 && title != null && !title.equalsIgnoreCase("")) {
+				GuiEvent e = new GuiEvent(jBAuction, BDC.GUIAUCTION);
+				AuctionItem ai = new AuctionItem(
+					jTAAuctionDescriptionInfo.getText().trim()
+					, getJCBCategory().getSelectedItem().toString()
+					, getJCBSubCategory().getSelectedItem().toString()
+				);
+				AuctionDetails ad = new AuctionDetails(
+					jTFStartPriceInt.getText().trim()
+					, jTFStartPriceDec.getText().trim()
+					, jTFEndPriceInt.getText().trim()
+					, jTFEndPriceDec.getText().trim()
+					, ticks
+					, title
+					, (BDC.AuctionTypes) jCBAutionType.getSelectedItem()
+				);
+				AuctionFactory af = new AuctionFactory();
+				Auction a = af.createAuction(ad, ai, myAgent.getNextAuctionNumber(), myAgent.getLocalName());
+				e.addParameter(a);
+				myAgent.postGuiEvent(e);
+			}
+		}								
+	}
+
+
+	private BuyingDutchmanAgent myAgent;
 	
 	private static final long serialVersionUID = 1L;
 		
@@ -99,18 +234,13 @@ public class BuyingDutchmanGui extends JFrame {
 	 * This method initializes 
 	 * 
 	 */
-	public BuyingDutchmanGui(BuyingDutchman agent) {
+	public BuyingDutchmanGui(BuyingDutchmanAgent agent) {
 		super();
 		myAgent = agent;
 		initialize();
 		// Make the agent terminate when the user closes 
 		// the GUI using the button on the upper right corner	
-		addWindowListener(new	WindowAdapter() {
-			public void windowClosing(WindowEvent e) {
-				GuiEvent f = new GuiEvent(this, BDC.GUICLOSE);
-				myAgent.postGuiEvent(f);
-			}
-		} );
+		addWindowListener(new WindowClose());
 	}
 
 	/**
@@ -342,25 +472,7 @@ public class BuyingDutchmanGui extends JFrame {
 			jTAuctions.getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 			jTAuctions.setColumnSelectionAllowed(false);
 			jTAuctions.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);						
-			jTAuctions.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
-
-				@Override
-				public void valueChanged(ListSelectionEvent arg0) {
-					if (!arg0.getValueIsAdjusting()) {
-						Auction a = myAgent.getShownAuction(((DefaultListSelectionModel)arg0.getSource()).getMaxSelectionIndex());
-						if (a != null) {
-							jTFAuctioneer.setText(a.getAuctioneer()); 
-							jTFAuctionNr.setText(a.getAN());
-							jTAAuctionDescription.setText(a.getAI().getItemDescription());
-						} else {
-							jTFAuctioneer.setText(null);
-							jTFAuctionNr.setText(null);
-							jTAAuctionDescription.setText(null);
-						}
-					}
-				}
-				
-			});
+			jTAuctions.getSelectionModel().addListSelectionListener(new ShownAuctionsListListener());
 		}
 		return jTAuctions;
 	}
@@ -444,18 +556,7 @@ public class BuyingDutchmanGui extends JFrame {
 			jBBuyNow = new JButton();
 			jBBuyNow.setName(BDC.BUYNOWBUTTON);
 			jBBuyNow.setText(BDC.BUYNOWBUTTONLABEL);
-			jBBuyNow.addActionListener(new ActionListener() {
-				@Override
-				public void actionPerformed(ActionEvent arg0) {
-					String auctioneer = jTFAuctioneer.getText().trim();
-					String auctionNr = jTFAuctionNr.getText().trim();
-					GuiEvent e = new GuiEvent(jBBuyNow, BDC.GUIBUYNOW);
-					e.addParameter(auctioneer);
-					e.addParameter(auctionNr);
-					myAgent.postGuiEvent(e);
-				}
-				
-			});
+			jBBuyNow.addActionListener(new ActionBuyNow());
 		}
 		return jBBuyNow;
 	}
@@ -469,7 +570,10 @@ public class BuyingDutchmanGui extends JFrame {
 		if (jTFBidPriceInt == null) {
 			jTFBidPriceInt = new JTextField(BDC.PRICEINTCOLUMNS);
 			jTFBidPriceInt.setDocument(doc);
-			jTFBidPriceInt.setText(BDC.PRICESTARTDEF);
+			// TODO Switch to commented after testing
+			jTFBidPriceInt.setText("5");
+			// jTFBidPriceInt.setText(BDC.PRICESTARTDEF);
+			
 		}
 		return jTFBidPriceInt;
 	}
@@ -498,16 +602,7 @@ public class BuyingDutchmanGui extends JFrame {
 			jBProposition = new JButton();
 			jBProposition.setName(BDC.PROPOSITIONBUTTON);
 			jBProposition.setText(BDC.PROPOSITIONBUTTONLABEL);
-			jBProposition.addActionListener(new ActionListener() {
-				@Override
-				public void actionPerformed(ActionEvent arg0) {
-					GuiEvent e = new GuiEvent(jBProposition, BDC.GUIPROPOSITION);
-					e.addParameter(jTFAuctionNr.getText().trim());
-					e.addParameter(jTFAuctioneer.getText().trim());
-					e.addParameter(jTFBidPriceInt.getText().trim()+BDC.FPOINT+jTFBidPriceDec.getText().trim());
-					myAgent.postGuiEvent(e);
-				}				
-			});
+			jBProposition.addActionListener(new ActionProposition());
 		}
 		return jBProposition;
 	}	
@@ -521,6 +616,8 @@ public class BuyingDutchmanGui extends JFrame {
 		if (jTFAuctionTitle == null) {
 			jTFAuctionTitle = new JTextField(BDC.AUCTIONTITLECOLUMNSNUMBER);
 			jTFAuctionTitle.setName(BDC.AUCTIONTITLETEXTFIELD);
+			// TODO Delete after testing
+			jTFAuctionTitle.setText("test");
 		}
 		return jTFAuctionTitle;
 	}
@@ -561,7 +658,9 @@ public class BuyingDutchmanGui extends JFrame {
 		if (jTFStartPriceInt == null) {
 			jTFStartPriceInt = new JTextField(6);
 			jTFStartPriceInt.setDocument(new JTFIntLength());
-			jTFStartPriceInt.setText(BDC.PRICESTARTDEF);
+			// TODO Switch to commented after testing
+			jTFStartPriceInt.setText("10");
+			// jTFStartPriceInt.setText(BDC.PRICESTARTDEF);
 		}
 		return jTFStartPriceInt;
 	}
@@ -680,7 +779,9 @@ public class BuyingDutchmanGui extends JFrame {
 			jTFAuctionDurationMinutes = new JTextField(BDC.DURATIONCOLUMNSNUMBER);
 			jTFAuctionDurationMinutes.setName(BDC.DURATIONMINUTESTEXTFIELD);
 			jTFAuctionDurationMinutes.setDocument(new JTFDurationLength());
-			jTFAuctionDurationMinutes.setText(BDC.DURATIONSTARTDEF);
+			// TODO Switch to commented after testing
+			jTFAuctionDurationMinutes.setText("1");
+			// jTFAuctionDurationMinutes.setText(BDC.DURATIONSTARTDEF);
 		}
 		return jTFAuctionDurationMinutes;
 	}
@@ -716,35 +817,7 @@ public class BuyingDutchmanGui extends JFrame {
 		if (jBAuction == null) {
 			jBAuction = new JButton();
 			jBAuction.setText(BDC.BEGINAUCTION);
-			jBAuction.addActionListener(new ActionListener(){
-				@Override
-				public void actionPerformed(ActionEvent ev) {
-					int ticks = countTicks();
-					float priceRange = calculatePriceRange();
-					String title = jTFAuctionTitle.getText().trim();
-					if (ticks > 0 && priceRange > 0 && title != null && !title.equalsIgnoreCase("")) {
-						GuiEvent e = new GuiEvent(jBAuction, BDC.GUIAUCTION);
-						AuctionItem ai = new AuctionItem(
-							jTAAuctionDescriptionInfo.getText().trim()
-							, getJCBCategory().getSelectedItem().toString()
-							, getJCBSubCategory().getSelectedItem().toString()
-						);
-						AuctionDetails ad = new AuctionDetails(
-							jTFStartPriceInt.getText().trim()
-							, jTFStartPriceDec.getText().trim()
-							, jTFEndPriceInt.getText().trim()
-							, jTFEndPriceDec.getText().trim()
-							, ticks
-							, title
-							, jCBAutionType.getSelectedItem().toString()
-						);
-						AuctionFactory af = new AuctionFactory();
-						Auction a = af.createAuction(ad, ai, myAgent.getNextAuctionNumber(), myAgent.getLocalName());
-						e.addParameter(a);
-						myAgent.postGuiEvent(e);
-					}
-				}								
-			});
+			jBAuction.addActionListener(new ActionAuction());
 		}
 		return jBAuction;
 	}
@@ -923,21 +996,7 @@ public class BuyingDutchmanGui extends JFrame {
 			jTFinishedAuctions.getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 			jTFinishedAuctions.setColumnSelectionAllowed(false);
 			jTFinishedAuctions.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
-			jTFinishedAuctions.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
-
-				@Override
-				public void valueChanged(ListSelectionEvent arg0) {
-					if (!arg0.getValueIsAdjusting()) {
-						Auction a = myAgent.getFinishedAuction(((DefaultListSelectionModel)arg0.getSource()).getMaxSelectionIndex());
-						if (a != null) {
-							jTAFinishedAuctionDescription.setText(a.getAI().getItemDescription());
-						} else {
-							jTAFinishedAuctionDescription.setText(null);
-						}
-					}
-				}
-				
-			});
+			jTFinishedAuctions.getSelectionModel().addListSelectionListener(new FinishedAuctionsListListener());
 		}
 		return jTFinishedAuctions;
 	}
@@ -964,7 +1023,8 @@ public class BuyingDutchmanGui extends JFrame {
 	
 	private JComboBox getJCBAutionType() {
 		if (jCBAutionType == null) {
-			jCBAutionType = new JComboBox((Object [])BDC.AuctionTypes);
+			//jCBAutionType = new JComboBox((Object [])BDC.AuctionTypes);
+			jCBAutionType = new JComboBox(BDC.AuctionTypes.values());
 		}
 		return jCBAutionType;
 	}
@@ -997,16 +1057,7 @@ public class BuyingDutchmanGui extends JFrame {
 			jBWaitAndBuy = new JButton();
 			jBWaitAndBuy.setName(BDC.WAITBUYBUTTON);
 			jBWaitAndBuy.setText(BDC.WAITBUYBUTTONLABEL);
-			jBWaitAndBuy.addActionListener(new ActionListener() {
-				@Override
-				public void actionPerformed(ActionEvent arg0) {
-					GuiEvent e = new GuiEvent(jBWaitAndBuy, BDC.GUIWAITBUY);
-					e.addParameter(jTFAuctionNr.getText().trim());
-					e.addParameter(jTFAuctioneer.getText().trim());
-					e.addParameter(jTFBidPriceInt.getText().trim()+BDC.FPOINT+jTFBidPriceDec.getText().trim());
-					myAgent.postGuiEvent(e);
-				}				
-			});
+			jBWaitAndBuy.addActionListener(new ActionWaitAndBuy());
 		}
 		return jBWaitAndBuy;
 	}

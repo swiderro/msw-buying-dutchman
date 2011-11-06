@@ -1,20 +1,23 @@
-package buyingDutchman;
+package buyingDutchmanClient;
 
 import java.util.HashMap;
 
 public final class BDC {
+	public enum AuctionTypes {
+		HOLENDERSKA, ANGIELSKA, DRUGIEJ_CENY, PRZETARG, GROSZOWA
+	}
 	//BuyingDutchman Consts
 	public static final String[] AUCTIONSCOLUMNNAMES = {
-		"# aukcji", "Typ", "Wystawca", "Kategoria", "Podkategoria", "Pozo. czas", "Cena", "Max oferta", "Tytu³"		
+		"# aukcji", "Typ", "Wystawca", "Kategoria", "Podkategoria", "Pozo. czas", "Cena", "Max oferta", "Oferent", "Tytu³"		
 	};
 	public static final String[] FINISHEDAUCTIONSCOLUMNNAMES = {
 		"# aukcji", "Typ", "Wystawca", "Kategoria", "Podkategoria", "Pozo. czas", "Cena", "Max oferta", "Oferent", "Tytu³"		
 	};
 	public static final int[] AUCTIONSCOLUMNWIDTH = {
-		50, 60, 60, 60, 60, 60, 60, 60, 60, 210
+		50, 80, 60, 60, 60, 60, 40, 60, 70, 210
 	};
 	public static final int[] FINISHEDAUCTIONSCOLUMNWIDTH = {
-		50, 60, 60, 60, 60, 60, 60, 60, 70, 200
+		50, 80, 60, 60, 60, 60, 40, 60, 70, 200
 	};
 	public static final String BDONTO = "bd-ontology";
 	public static final String SDTYPELISTENER = "bd-agent";
@@ -57,7 +60,7 @@ public final class BDC {
 	//BuyingDutchmanGui Consts
 	//FRAME CONSTS
 	public static final String FRAMETITLE = "Buying Dutchman";  
-	public static final int FRAMEWIDTH = 750;
+	public static final int FRAMEWIDTH = 850;
 	public static final int FRAMEHEIGHT = 400;
 	//TABS CONSTS
 	public static final String AUCTIONSTAB = "Aukcje";
@@ -132,11 +135,9 @@ public final class BDC {
 	public static final String ENGLISH = "Angielska";
 	public static final String SECOND_PRICE = "Drugiej ceny";
 	public static final String BIDDING = "Przetarg";
-	public static final String[] AuctionTypes = {
-		DUTCH, ENGLISH, SECOND_PRICE, BIDDING
-	};
-	public static final String[] ExplicitAuctionTypes = {
-		ENGLISH, BIDDING
+	public static final String PENNY = "Groszowa";
+	public static final String[] AuctionTypesStrings = {
+		DUTCH, ENGLISH, SECOND_PRICE, BIDDING, PENNY
 	};
 }
 

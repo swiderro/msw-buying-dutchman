@@ -1,10 +1,14 @@
-package buyingDutchman;
+package buyingDutchmanClient;
 
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.Vector;
 import java.util.Hashtable;
 import javax.swing.table.AbstractTableModel;
+
+import auctions.Auction;
+import automaticBuyers.AutomaticBuyer;
+import automaticBuyers.AutomaticBuyerFactory;
 
 import jade.core.AID;
 import jade.core.Agent;
@@ -23,7 +27,7 @@ import jade.lang.acl.UnreadableException;
 /**
  * @author Marcin Lucjan Swiderski FEIT WUT
  */
-public class BuyingDutchman extends GuiAgent {
+public class BuyingDutchmanAgent extends GuiAgent {	
 
 	/** Default serialization const */
 	private static final long serialVersionUID = 1L;
@@ -56,7 +60,7 @@ public class BuyingDutchman extends GuiAgent {
 	/** A flag used for refreshing displayed finished auctions table*/
 	private boolean refreshFinishedAuctionTable;
 	/** Auctions the agent is going to bid*/
-	private Hashtable waitAndBuyAuctions;
+	private Hashtable automaticBuyers;
 	
 	protected void setup() {
 		//Field initialization
@@ -66,7 +70,7 @@ public class BuyingDutchman extends GuiAgent {
 		shownAuctions = new Hashtable();
 		shownAuctionsRowNumber = new Vector();
 		finishedAuctions = new Hashtable();
-		waitAndBuyAuctions = new Hashtable();
+		automaticBuyers = new Hashtable();
 		finishedAuctionsRowNumber = new Vector();
 		nextAuctionNumber = 0;
 		refreshAuctionsTable = false;
@@ -149,12 +153,15 @@ public class BuyingDutchman extends GuiAgent {
 	}	
 
 	private void waitAndBuy(String auctionNr, String auctioneer, float bid) {
+		if (fraudBid(auctioneer))
+			return;
 		Auction a = (Auction) shownAuctions.get(auctioneer+BDC.POSTFIX+auctionNr);
 		if (a != null) {
-			if (bid >= a.getPrice())
-				propose(auctionNr, auctioneer, bid);				
-			else
-				waitAndBuyAuctions.put(auctioneer+BDC.POSTFIX+auctionNr, bid);			
+			AutomaticBuyer ab = AutomaticBuyerFactory.AutomaticBuyerInstance(this, bid, a.getType());
+			if (ab != null) {
+				automaticBuyers.put(auctioneer+BDC.POSTFIX+auctionNr,ab);
+				ab.performDuty(a);
+			}
 		} else
 			return;
 	}
@@ -213,7 +220,12 @@ public class BuyingDutchman extends GuiAgent {
 	private void auction(Auction a) {
 		addBehaviour(new AuctionStartBehaviour(a));
 	}
+	private boolean fraudBid(String auctioneer) {
+		return auctioneer.equalsIgnoreCase(getLocalName());
+	}	
 	private void propose(String auctionNr, String auctioneer, float bid) {
+		if (fraudBid(auctioneer))
+			return;
 		Auction a = (Auction) shownAuctions.get(auctioneer+BDC.POSTFIX+auctionNr);
 		if (a != null) {
 			String maxBid = a.getMaxBid();
@@ -231,8 +243,8 @@ public class BuyingDutchman extends GuiAgent {
 			return;
 	}
 
-	private void buyNow(String auctioneer, String auctionNr) {		
-		if (auctioneer.equalsIgnoreCase(getLocalName()))
+	public void buyNow(String auctioneer, String auctionNr) {		
+		if (fraudBid(auctioneer))
 			return;
 		ACLMessage msg = getProposeMsg();
 		ACLMessage [] mes = {msg};
@@ -242,6 +254,8 @@ public class BuyingDutchman extends GuiAgent {
 		send(msg);
 	}
 
+	
+	
 	private String reducePrices(String content) {
 		Iterator i = ownActiveAuctions.values().iterator();
 		Hashtable h = new Hashtable();
@@ -253,7 +267,9 @@ public class BuyingDutchman extends GuiAgent {
 					+ BDC.SEPARATOR + a.getPriceInt() 
 					+ BDC.SEPARATOR + a.getPriceDec() 
 					+ BDC.SEPARATOR + a.getTicksLeft()
-					+ BDC.SEPARATOR + a.getMaxBid();
+					+ BDC.SEPARATOR + a.getMaxBid()
+					+ BDC.SEPARATOR + a.getMaxBidder()
+					;
 			} else {
 				// There was a bidding
 				if (a.getMaxBidFloat() >= 0 && a.getMaxBidFloat() >= a.getPrice()) {
@@ -417,10 +433,11 @@ public class BuyingDutchman extends GuiAgent {
 				Auction a = (Auction) ownActiveAuctions.get(content[1]);
 				if (a == null)
 					return;
-				if (a.buyNow(maxBidder)) {					
+				if (a.buyNow(maxBidder)) {
+					// Accepted offer to buy immediately
 					ownActiveAuctions.put(a.getAN(), a);
 					//Sending Accept_proposal message to both bidder and auctioneer
-					//to obey the rule: "Autioneer shows the same informations as other agents"
+					//to obey the rule: "Auctioneer shows the same informations as other agents"
 					reply = getAcceptProposalMsg(a);
 					reply.addReceiver(getAID());
 					reply.addReceiver(sender);					
@@ -432,7 +449,7 @@ public class BuyingDutchman extends GuiAgent {
 			} else if (content[0].equalsIgnoreCase(BDC.BID)) {
 				Auction a = (Auction) ownActiveAuctions.get(content[1]);
 				if (a!=null) {
-					if (!a.waitAndBuy(sender.getLocalName(), Float.valueOf(content[2]).floatValue())) {
+					if (!a.propose(sender.getLocalName(), Float.valueOf(content[2]).floatValue())) {
 						reply = getRejectProposalMsg();
 						reply.addReceiver(sender);
 						send(reply);
@@ -463,6 +480,7 @@ public class BuyingDutchman extends GuiAgent {
 						, content[3]
 						, new Integer(content[4]).intValue()
 						, content[5]
+						, content[6]
 					);
 					setRefreshAuctionsTable(true);
 				} else {
@@ -474,7 +492,7 @@ public class BuyingDutchman extends GuiAgent {
 			}
 			// multiple auctions after AuctionTickBehaviour
 			else if (content[0].equals(BDC.AUCTIONS)) {
-				for (int j = 1; j < content.length; j+=5) {
+				for (int j = 1; j < content.length; j+=6) {
 					Auction aa = (Auction) shownAuctions.get(sender + BDC.POSTFIX + content[j]);
 					if ( aa != null) {
 						aa.onTick(
@@ -482,13 +500,15 @@ public class BuyingDutchman extends GuiAgent {
 							, content[j+2]
 							, new Integer(content[j+3]).intValue()
 							, content[j+4]
+							, content[j+5]          
 						);
-						Object bid = waitAndBuyAuctions.get(sender + BDC.POSTFIX + content[j]);
-						if (bid != null && Float.valueOf(bid.toString()) <= aa.getPrice()) {
-							propose(content[j], sender, Float.valueOf(bid.toString()));							
-						}
+						// If AutomaticBidder exists for this exact auction, run it
+						AutomaticBuyer ab = (AutomaticBuyer) automaticBuyers.get(sender + BDC.POSTFIX + content[j]);
+						if (ab!=null)
+							ab.performDuty(aa);
 						setRefreshAuctionsTable(true);
 					} else {
+						// Auction is running, but it isn't shown yet.
 						ACLMessage req = getRequestMsg();
 						req.addReceiver(msg.getSender());
 						req.setContent(content[j]);
@@ -520,7 +540,7 @@ public class BuyingDutchman extends GuiAgent {
 					selection = (String) shownAuctionsRowNumber.get(i);
 				for (int j = 1; j < content.length; j+=1) {
 					Auction a = (Auction) shownAuctions.remove(sender + BDC.POSTFIX + content[j]);
-					waitAndBuyAuctions.remove(sender + BDC.POSTFIX + content[j]);
+					automaticBuyers.remove(sender + BDC.POSTFIX + content[j]);
 					if ( a!=null ) {
 						if (
 							a.getAuctioneer().equalsIgnoreCase(getLocalName())
@@ -739,7 +759,9 @@ public class BuyingDutchman extends GuiAgent {
 			+ BDC.SEPARATOR + a.getPriceInt() 
 			+ BDC.SEPARATOR + a.getPriceDec() 
 			+ BDC.SEPARATOR + a.getTicksLeft()
-			+ BDC.SEPARATOR + a.getMaxBid();
+			+ BDC.SEPARATOR + a.getMaxBid()
+			+ BDC.SEPARATOR + a.getMaxBidder()
+			;
 	}
 
 	public AbstractTableModel getBdtm() {
