@@ -1,6 +1,7 @@
 package buyingDutchmanClient;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.util.Iterator;
 import java.util.Vector;
 import java.util.Hashtable;
@@ -137,14 +138,14 @@ public class BuyingDutchmanAgent extends GuiAgent {
 			propose(
 				(String) ev.getParameter(BDC.PROPOSEAUCTIONNRPARAMNUM)
 				, (String) ev.getParameter(BDC.PROPOSEAUCTIONEERPARAMNUM)
-				, Float.valueOf((String)ev.getParameter(BDC.PROPOSEBIDPARAMNUM)).floatValue()
+				, new BigDecimal((String)ev.getParameter(BDC.PROPOSEBIDPARAMNUM))
 			);			
 		}
 		if (ev.getType() == BDC.GUIWAITBUY) {
 			waitAndBuy(
 				(String) ev.getParameter(BDC.WAITBUYAUCTIONNRPARAMNUM)
 				, (String) ev.getParameter(BDC.WAITBUYAUCTIONEERPARAMNUM)
-				, Float.valueOf((String)ev.getParameter(BDC.WAITBUYBIDPARAMNUM)).floatValue()
+				, new BigDecimal((String)ev.getParameter(BDC.WAITBUYBIDPARAMNUM))
 			);
 		}
 		if (ev.getType() == BDC.GUICLOSE) {
@@ -152,7 +153,7 @@ public class BuyingDutchmanAgent extends GuiAgent {
 		}
 	}	
 
-	private void waitAndBuy(String auctionNr, String auctioneer, float bid) {
+	private void waitAndBuy(String auctionNr, String auctioneer, BigDecimal bid) {
 		if (fraudBid(auctioneer))
 			return;
 		Auction a = (Auction) shownAuctions.get(auctioneer+BDC.POSTFIX+auctionNr);
@@ -222,22 +223,22 @@ public class BuyingDutchmanAgent extends GuiAgent {
 	}
 	private boolean fraudBid(String auctioneer) {
 		return auctioneer.equalsIgnoreCase(getLocalName());
-	}	
-	private void propose(String auctionNr, String auctioneer, float bid) {
+	}
+	// TODO Udokumentowaæ JavaDoc'iem dzia³anie i moment wywo³ania
+	public void propose(String auctionNr, String auctioneer, BigDecimal newBid) {
 		if (fraudBid(auctioneer))
 			return;
 		Auction a = (Auction) shownAuctions.get(auctioneer+BDC.POSTFIX+auctionNr);
 		if (a != null) {
-			String maxBid = a.getMaxBid();
-			if (maxBid.equalsIgnoreCase(BDC.NONESTRING))
-				maxBid = "-1";
-			if (bid <= Float.valueOf(maxBid).floatValue())
+			BigDecimal maxBid = a.getMaxBid();
+			// TODO !!! CZY ABY NA PEWNO TO TU MA BYÆ / TAK MA BYÆ? !!!
+			if ( maxBid == null || (newBid.compareTo(maxBid) <= 0) )
 				return;
 			//There's still an auction and proposed bid is high enough
 			ACLMessage proposition = getProposeMsg();
 			ACLMessage [] mes = {proposition};
 			fillUpReceivers(mes, getAgent(auctioneer));
-			proposition.setContent(BDC.BID+BDC.SEPARATOR+auctionNr+BDC.SEPARATOR+Float.toString(bid));
+			proposition.setContent(BDC.BID+BDC.SEPARATOR+auctionNr+BDC.SEPARATOR+newBid.toPlainString());
 			send(proposition);
 		} else
 			return;
@@ -267,12 +268,13 @@ public class BuyingDutchmanAgent extends GuiAgent {
 					+ BDC.SEPARATOR + a.getPriceInt() 
 					+ BDC.SEPARATOR + a.getPriceDec() 
 					+ BDC.SEPARATOR + a.getTicksLeft()
-					+ BDC.SEPARATOR + a.getMaxBid()
+					+ BDC.SEPARATOR + a.getMaxBidString()
 					+ BDC.SEPARATOR + a.getMaxBidder()
 					;
 			} else {
 				// There was a bidding
-				if (a.getMaxBidFloat() >= 0 && a.getMaxBidFloat() >= a.getPrice()) {
+				// TODO !!! Sprawdziæ, czy to nie chrzani programu
+				if (a.getMaxBid() != null && a.getMaxBid().compareTo(BigDecimal.ZERO) >= 0 && a.getMaxBid().compareTo(a.getPrice()) >= 0 ) {
 					ACLMessage reply = getAcceptProposalMsg(a);
 					ACLMessage [] mes = {reply};
 					reply.addReceiver(getAID());
@@ -449,7 +451,7 @@ public class BuyingDutchmanAgent extends GuiAgent {
 			} else if (content[0].equalsIgnoreCase(BDC.BID)) {
 				Auction a = (Auction) ownActiveAuctions.get(content[1]);
 				if (a!=null) {
-					if (!a.propose(sender.getLocalName(), Float.valueOf(content[2]).floatValue())) {
+					if (!a.propose(sender.getLocalName(), new BigDecimal(content[2]))) {
 						reply = getRejectProposalMsg();
 						reply.addReceiver(sender);
 						send(reply);
@@ -759,7 +761,7 @@ public class BuyingDutchmanAgent extends GuiAgent {
 			+ BDC.SEPARATOR + a.getPriceInt() 
 			+ BDC.SEPARATOR + a.getPriceDec() 
 			+ BDC.SEPARATOR + a.getTicksLeft()
-			+ BDC.SEPARATOR + a.getMaxBid()
+			+ BDC.SEPARATOR + a.getMaxBidString()
 			+ BDC.SEPARATOR + a.getMaxBidder()
 			;
 	}

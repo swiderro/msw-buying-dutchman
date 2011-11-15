@@ -1,5 +1,7 @@
 package auctions;
 
+import java.math.BigDecimal;
+
 import buyingDutchmanClient.BDC;
 
 public class AuctionDutch extends Auction {
@@ -8,27 +10,14 @@ public class AuctionDutch extends Auction {
 		super(AD, AI, AN, Auctioneer);
 	}
 
-	private static final long serialVersionUID = 1L;
-
-	@Override
-	public String getMaxBid() {
-		if (maxBid >=0 && isFinished())
-			return Float.toString(maxBid);		
-		else
-			return BDC.NONESTRING;
-	}
-
-	@Override
-	public boolean propose(String bidder, float bid) {
-		return false;
-	}
+	private static final long serialVersionUID = 1L;	
 
 	@Override
 	protected boolean checkFinishByOffer() {
 		//computing new price after thick
-		float newPrice = computePrice();
+		BigDecimal newPrice = computePrice();
 		//koñczy, jeœli jest oferta
-		if (maxBid >= newPrice
+		if ( getMaxBid() != null && getMaxBid().compareTo(newPrice) >= 0
 			//dodatkowe zabezpieczenie. na razie wy³¹czam
 //			|| getEndPrice() > newPrice
 		) {
@@ -45,17 +34,26 @@ public class AuctionDutch extends Auction {
 			setMaxBidder(MaxBidder);
 			maxBidInt = getPriceInt();
 			maxBidDec = getPriceDec();
-			maxBid = Float.valueOf(maxBidInt+BDC.FPOINT+maxBidDec).floatValue();
+			maxBid = new BigDecimal(maxBidInt+BDC.FPOINT+maxBidDec);
 			setFinished(true);
 			return true;
 		}
 	}
 	@Override
 	protected void performAuctionTick() {
-		setPrice(getPrice() - getReductionStep());
+		setPrice(getPrice().subtract(getReductionStep()));
 		//zapobiega b³êdom zaokr¹gleñ, gdy zamiast zera wychodzi np. 4.76231E-7
-		if (getPrice() < 0.01)
-			setPrice(0);
+		// TODO Zmieniæ, gdy bêdzie problem z wartoœci¹ blisk¹ 0
+		//if (getPrice().compareTo(BigDecimal.valueOf(0.01)) < 0)
+			//setPrice(BigDecimal.valueOf(0));
+	}
+
+	@Override
+	protected boolean isBestBid(BigDecimal bid) {
+		if (bid.compareTo(getMaxBid()) > 0)
+			return true;
+		else
+			return false;
 	}
 
 }

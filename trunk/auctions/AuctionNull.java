@@ -1,6 +1,6 @@
 package auctions;
 
-import buyingDutchmanClient.BDC;
+import java.math.BigDecimal;
 
 public class AuctionNull extends Auction {
 	/**
@@ -13,17 +13,17 @@ public class AuctionNull extends Auction {
 	}
 
 	@Override
-	public String getMaxBid() {
-		return BDC.NONESTRING;
-	}
-
-	@Override
 	protected boolean checkFinishByOffer() {
 		return true;
 	}
 
 	@Override
 	protected void performAuctionTick() {		
+	}
+
+	@Override
+	protected boolean isBestBid(BigDecimal bid) {
+		return false;
 	}
 
 }

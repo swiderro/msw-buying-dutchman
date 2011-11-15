@@ -1,10 +1,11 @@
 package auctions;
 
+import java.math.BigDecimal;
 import java.util.HashMap;
 import buyingDutchmanClient.BDC;
 
 public class AuctionPenny extends Auction {
-
+	//TODO nie dzia³a poprawnie sk³adanie oferty dla tego typu aukcji. Do poprawy.
 	private HashMap<String, AutomaticBid> automaticBidders;
 
 	public AuctionPenny(AuctionDetails AD, AuctionItem AI, String AN,
@@ -37,14 +38,6 @@ public class AuctionPenny extends Auction {
 	}
 
 	@Override
-	public String getMaxBid() {
-		if (maxBid >= 0)
-			return Float.toString(maxBid);		
-		else
-			return BDC.NONESTRING;
-	}
-
-	@Override
 	protected void performAuctionTick() {
 		if (getAd().getTicksLeft() <= 0) {
 			if (!noAutomaticBidders()) {
@@ -52,7 +45,7 @@ public class AuctionPenny extends Auction {
 					AutomaticBid a = automaticBidders.get(bidder);
 					if (a.useBid()) {
 						// Increases auction price by currency rate corresponding to number of automatic bidders that still can provide
-						setPrice(getPrice()+(float)0.01);
+						setPrice(getPrice().add(BigDecimal.valueOf(BDC.Grosz)));
 						// Prolongs auction time by number of thicks equal to number of automatic bidders that still can provide
 						setTicksLeft(getTicksLeft()+1);
 					} else
@@ -61,6 +54,13 @@ public class AuctionPenny extends Auction {
 				}
 			}
 		}
+	}
+
+	@Override
+	protected boolean isBestBid(BigDecimal bid) {
+		// TODO Zastanowiæ siê, jak to zaimplementwaæ. Jak w ogóle do cholery ja zaimplementowa³em te automaty? Pod oczekuj i kup?
+		// TODO Czy powinna byæ mo¿liwoœæ rêcznego podbijania? Jeœli tak, to pod którym przyciskiem?
+		return false;
 	}
 
 }

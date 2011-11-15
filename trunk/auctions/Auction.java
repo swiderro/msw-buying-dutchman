@@ -1,13 +1,12 @@
 package auctions;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 
 import buyingDutchmanClient.BDC;
 import buyingDutchmanClient.BDC.AuctionTypes;
 
 public abstract class Auction implements Serializable {
-	// TODO Trzeba wyœwietlaæ najwy¿szego oferenta: potrzebne do przetargów, aukcji angielskiej, drugiej ceny. Do groszowej niekoniecznie.
-	// TODO W zwi¹zku z tym trzeba zmieniæ klasy od tabelek: 
 	private static final long serialVersionUID = 1L;
 	private final AuctionDetails ad;
 	private final AuctionItem ai;
@@ -17,35 +16,35 @@ public abstract class Auction implements Serializable {
 	protected String maxBidDec;
 	protected String maxBidder;
 	private boolean finished;
-	private float reductionStep;
-	private float endPrice;
-	private float price;
-	protected float maxBid;
+	private BigDecimal reductionStep;
+	private BigDecimal endPrice;
+	protected BigDecimal price;
+	protected BigDecimal maxBid;
 	/**
 	 * @param ad
 	 * @param ai
 	 * @param an
 	 */
 	public Auction(AuctionDetails AD, AuctionItem AI, String AN, String Auctioneer) {
-		ad = AD;
-		ai = AI;
-		an = AN;
-		finished = false;
-		auctioneer = Auctioneer;
-		maxBidInt = null;
-		maxBidDec = null;
+		this.ad = AD;
+		this.ai = AI;
+		this.an = AN;
+		this.finished = false;
+		this.auctioneer = Auctioneer;
+		this.maxBid = null;
+		this.maxBidInt = null;
+		this.maxBidDec = null;
 		setMaxBidder(null);
-		setPrice(computePrice());			
+		setPrice(computePrice());
 		setEndPrice(computeEndPrice());
 		int time = ((AD.getStartTicks())/BDC.TICK);		
-		setReductionStep((getPrice() - getEndPrice())/((float) time));
-		maxBid = -1;
+		setReductionStep(getPrice().subtract(getEndPrice()).divide(new BigDecimal(time), BDC.BigDecimalScale, BDC.BigDecimalRounding));
 	}
-	private float computeEndPrice() {		
-		return Float.valueOf(getAd().getEndPriceInt()+BDC.FPOINT+getAd().getEndPriceDec());
+	private BigDecimal computeEndPrice() {		
+		return new BigDecimal(getAd().getEndPriceInt()+BDC.FPOINT+getAd().getEndPriceDec());
 	}
-	protected float computePrice() {
-		return Float.valueOf(getAd().getPriceInt()+BDC.FPOINT+getAd().getPriceDec());
+	protected BigDecimal computePrice() {
+		return new BigDecimal(getAd().getPriceInt()+BDC.FPOINT+getAd().getPriceDec());
 	}
 	public AuctionDetails getAd() {
 		return ad;
@@ -65,14 +64,8 @@ public abstract class Auction implements Serializable {
 	public String getPriceInt() {		
 		return getAd().getPriceInt();
 	}
-	private void setPriceInt(String i) {
-		getAd().setPriceInt(i);
-	}
 	public String getPriceDec() {
 		return getAd().getPriceDec();		
-	}
-	private void setPriceDec(String i) {
-		getAd().setPriceDec(i);
 	}
 	public int getTicksLeft() {
 		return getAd().getTicksLeft();
@@ -85,13 +78,13 @@ public abstract class Auction implements Serializable {
 	protected abstract boolean checkFinishByOffer();
 	//Wykonuje czynnoœci aukcji zwi¹zan¹ z zegarem, takie jak obni¿enie ceny.
 	//Dla ka¿dego typu aukcji mo¿e byæ inny, wiêc jest zadeklarowany jako abstract
+	// TODO Czy powy¿sze jest prawd¹? Tak naprawdê, to tylko aukcja holenderska manipuluje cen¹ w czasie z automatu.
+	// TODO Zobaczyæ, jak to jest zaimplementowane w aukcjach innych ni¿ holenderska.
 	protected abstract void performAuctionTick();
 	public final void performFinish(){
-		String ii = Float.toString(getPrice());
 		setFinished(true);
-		String [] i = ii.split(BDC.REGEXFPOINT);
-		int j = i[1].length();
-		if (j >= 2) {
+		String [] i = getPrice().toPlainString().split(BDC.REGEXFPOINT);
+		if (i[1].length() >= 2) {
 			getAd().setPriceDec(i[1].substring(0, 2));
 			getAd().setPriceInt(i[0]);
 		} else {
@@ -115,9 +108,7 @@ public abstract class Auction implements Serializable {
 	public void onTick(String priceInt, String priceDec, int ticksLeft, String MaxBid, String MaxBidder) {	
 		if (isFinished())
 			return;
-		setPriceInt(priceInt);
-		setPriceDec(priceDec);
-		setPrice(Float.parseFloat(priceInt+BDC.FPOINT+priceDec));
+		setPrice(new BigDecimal(priceInt+BDC.FPOINT+priceDec));
 		setTicksLeft(ticksLeft);
 		if (!MaxBid.equalsIgnoreCase(BDC.NONESTRING))
 			setMaxBid(MaxBid);
@@ -125,17 +116,15 @@ public abstract class Auction implements Serializable {
 			setMaxBidder(MaxBidder);
 	}
 	private void setMaxBid(String MaxBid) {
-		String ii = MaxBid;
-		String [] i = ii.split(BDC.REGEXFPOINT);
-		int j = i[1].length();
-		if (j >= 2) {
+		maxBid = new BigDecimal(maxBidInt+BDC.FPOINT+maxBidDec);
+		String [] i = maxBid.toPlainString().split(BDC.REGEXFPOINT);
+		if (i[1].length() >= 2) {
 			maxBidDec = i[1].substring(0, 2);
 			maxBidInt = i[0];
 		} else {
 			maxBidDec = i[1]+"0";
 			maxBidInt = i[0];
 		}
-		maxBid = Float.valueOf(maxBidInt+BDC.FPOINT+maxBidDec);
 	}
 	public String getTitle() {		
 		return getAd().getTitle();
@@ -146,8 +135,13 @@ public abstract class Auction implements Serializable {
 	public String getAuctioneerAN() {
 		return auctioneer+BDC.POSTFIX+an;
 	}
-	public abstract String getMaxBid();
-	public float getMaxBidFloat() {
+	public final String getMaxBidString() {
+		if (maxBid != null && isFinished())
+			return maxBid.toString();		
+		else
+			return BDC.NONESTRING;
+	}
+	public final BigDecimal getMaxBid() {
 		return maxBid;
 	}
 	public String getMaxBidder() {	
@@ -165,7 +159,7 @@ public abstract class Auction implements Serializable {
 		case 4: return getSubCategory();
 		case 5: return getTicksLeft()/BDC.TICK;
 		case 6: return getPriceInt()+BDC.POINT+getPriceDec();
-		case 7: return getMaxBid();
+		case 7: return getMaxBidString();
 		case 8: return getMaxBidder();
 		case 9: return getTitle();
 		}
@@ -189,68 +183,86 @@ public abstract class Auction implements Serializable {
 		case 4: return getSubCategory();
 		case 5: return getTicksLeft()/BDC.TICK;
 		case 6: return getPriceInt()+BDC.POINT+getPriceDec();
-		case 7: return getMaxBid();
+		case 7: return getMaxBidString();
 		case 8: return getMaxBidder();
 		case 9: return getTitle();
 		}
 		return null;
 	}
+	// Mo¿na by daæ to jako abstract, ale tak naprawdê tylko w aukcji holenderskiej jest opcja kup teraz.
+	// Dlatego te¿ zostawiam tu domyœlne zachowanie, a przes³aniam w holenderskiej.
 	public boolean buyNow(String MaxBidder) {
 		return false;
 	}
 	public void buyNow(String MaxBidder, String MaxBidInt, String MaxBidDec) {
 		setMaxBidder(MaxBidder);
-		maxBidInt = MaxBidInt;
-		maxBidDec = MaxBidDec;
-		maxBid = Float.valueOf(maxBidInt+BDC.FPOINT+maxBidDec).floatValue();
+		setMaxBidInt(MaxBidInt);
+		setMaxBidDec(MaxBidDec);
+		setMaxBid(maxBidInt+BDC.FPOINT+maxBidDec);
 		return;
 	}
-	public boolean propose(String bidder, float bid) {
+	private void setMaxBidDec(String maxBidDec2) {
+		maxBidDec = maxBidDec2;
+	}
+	private void setMaxBidInt(String maxBidInt2) {
+		maxBidInt = maxBidInt2;
+	}
+	// Inaczej obs³ugiwane w aukcji drugiej ceny
+	// Inaczej obs³ugiwane w przetargu
+	// Nie wystêpuje w aukcji groszowej
+	// Nie wystêpuje w aukcji holenderskiej
+	// Jak poni¿ej dla aukcji angielskiej
+	// TODO Przerobiæ na abstract i zaimplementowaæ w poszczególnych klasach aukcji.
+	public final boolean propose(String bidder, BigDecimal bid) {
 		if (isFinished())
 			return false;
 		else {
-			if (bid <= getMaxBidFloat())
+			if (isBestBid(bid)){
+				// TODO Tutaj setPrice MUSI byæ przed setMaxBid
+				// inaczej wypierdzieli siê aukcja drugiej ceny
+				// Kurwa, a mo¿e to zmieniæ ?
+				setPrice(bid);
+				setMaxBid(bid);
+				setMaxBidder(bidder);
+				return true;
+			} else
 				return false;
-			// maxBid przyda siê do auckji drugiej ceny
-			setMaxBid(bid);
-			setPrice(bid);
-			setMaxBidder(bidder);
-			return true;
 		}
 	}
+	// metoda okreœla, czy z³o¿ona oferta jest lepsza od obowi¹zuj¹cej
+	protected abstract boolean isBestBid(BigDecimal bid);
+	
 	protected void setMaxBidder(String bidder) {
 		maxBidder = bidder;		
 	}
-	public float getPrice() {
+	public BigDecimal getPrice() {
 		//return Float.valueOf(getAd().getPriceInt()+BDC.FPOINT+getAd().getPriceDec()).floatValue();
 		return this.price;
 	}
-	protected void setPrice(float price) {
-		 this.price = price;
-		 String pp = Float.toString(this.price);			
-			String [] p = pp.split(BDC.REGEXFPOINT);
-			int j = p[1].length();
-			if (j >= 2) {
-				getAd().setPriceDec(p[1].substring(0, 2));
-				getAd().setPriceInt(p[0]);
-			} else {
-				getAd().setPriceDec(p[1]+"0");
-				getAd().setPriceInt(p[0]);
-			}		 
+	protected void setPrice(BigDecimal bid) {
+		 this.price = bid;
+		 String [] p = this.price.toPlainString().split(BDC.REGEXFPOINT);
+		 if (p[1].length() >= 2) {
+			 getAd().setPriceDec(p[1].substring(0, 2));
+			 getAd().setPriceInt(p[0]);
+		 } else {
+			 getAd().setPriceDec(p[1]+"0");
+			 getAd().setPriceInt(p[0]);
+		 }		 
 	}
-	public void setReductionStep(float reductionStep) {
+	public void setReductionStep(BigDecimal reductionStep) {
 		this.reductionStep = reductionStep;
 	}
-	public float getReductionStep() {
+	public BigDecimal getReductionStep() {
 		return reductionStep;
 	}
-	public void setEndPrice(float endPrice) {
-		this.endPrice = endPrice;
+	public void setEndPrice(BigDecimal bigDecimal) {
+		this.endPrice = bigDecimal;
 	}
-	public float getEndPrice() {
+	public BigDecimal getEndPrice() {
 		return endPrice;
 	}
-	public void setMaxBid(float maxBid) {
+	public void setMaxBid(BigDecimal maxBid) {
 		this.maxBid = maxBid;
 	}
 }
