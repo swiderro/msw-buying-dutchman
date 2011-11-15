@@ -1,5 +1,7 @@
 package buyingDutchmanClient;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.HashMap;
 
 public final class BDC {
@@ -139,6 +141,9 @@ public final class BDC {
 	public static final String[] AuctionTypesStrings = {
 		DUTCH, ENGLISH, SECOND_PRICE, BIDDING, PENNY
 	};
+	public static final double Grosz = 0.01;
+	public static final int BigDecimalScale = 8;
+	public static final int BigDecimalRounding = BigDecimal.ROUND_HALF_EVEN;
 }
 
 
