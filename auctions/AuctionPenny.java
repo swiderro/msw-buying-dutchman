@@ -21,7 +21,7 @@ public class AuctionPenny extends Auction {
 	@Override
 	protected boolean checkFinishByOffer() {
 		if (getAd().getTicksLeft() <= 0) {
-			if (noAutomaticBidders()){
+			if (existAutomaticBidders()){
 				setFinished(true);
 				return true;
 			} else
@@ -30,27 +30,31 @@ public class AuctionPenny extends Auction {
 			return false;
 	}
 
-	private boolean noAutomaticBidders() {
+	private boolean existAutomaticBidders() {
 		if (automaticBidders == null)
-			return true;
+			return false;
 		else
-			return automaticBidders.isEmpty();
+			return !automaticBidders.isEmpty();
 	}
 
 	@Override
 	protected void performAuctionTick() {
 		if (getAd().getTicksLeft() <= 0) {
-			if (!noAutomaticBidders()) {
+			if (existAutomaticBidders()) {
 				for ( String bidder : automaticBidders.keySet() ) {
 					AutomaticBid a = automaticBidders.get(bidder);
-					if (a.useBid()) {
-						// Increases auction price by currency rate corresponding to number of automatic bidders that still can provide
-						setPrice(getPrice().add(BigDecimal.valueOf(BDC.Grosz)));
-						// Prolongs auction time by number of thicks equal to number of automatic bidders that still can provide
-						setTicksLeft(getTicksLeft()+1);
-					} else
-						// Removing bidder, that can't provide
-						automaticBidders.remove(bidder);
+					if (a.getStartPrice().compareTo(getPrice()) <= 0) {
+						if (a.useBid()) {
+							// Increases auction price by currency rate corresponding to number of automatic bidders that still can provide
+							setNewPrice(getPrice().add(BigDecimal.valueOf(BDC.Grosz)));
+							// Prolongs auction time by number of thicks equal to number of automatic bidders that still can provide
+							setTicksLeft(getTicksLeft()+1);
+						} else {
+							// Removing bidder, that can't provide
+							// Not sure if won't cause problems because of hashtable easy fail 
+							automaticBidders.remove(bidder);
+						}
+					}
 				}
 			}
 		}

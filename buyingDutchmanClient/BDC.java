@@ -142,8 +142,6 @@ public final class BDC {
 		DUTCH, ENGLISH, SECOND_PRICE, BIDDING, PENNY
 	};
 	public static final double Grosz = 0.01;
-	public static final int BigDecimalScale = 8;
+	public static final int BigDecimalScale = 16;
 	public static final int BigDecimalRounding = BigDecimal.ROUND_HALF_EVEN;
 }
-
-

@@ -30,7 +30,7 @@ import jade.lang.acl.UnreadableException;
  */
 public class BuyingDutchmanAgent extends GuiAgent {	
 
-	/** Default serialization const */
+	/** Default serialization constant */
 	private static final long serialVersionUID = 1L;
 	/** Agent name, not fully qualified */
 	private String nickName;
@@ -225,16 +225,13 @@ public class BuyingDutchmanAgent extends GuiAgent {
 		return auctioneer.equalsIgnoreCase(getLocalName());
 	}
 	// TODO Udokumentowaæ JavaDoc'iem dzia³anie i moment wywo³ania
+	// Po klikniêciu z³ó¿ ofertê, na agencie kupca
 	public void propose(String auctionNr, String auctioneer, BigDecimal newBid) {
 		if (fraudBid(auctioneer))
 			return;
 		Auction a = (Auction) shownAuctions.get(auctioneer+BDC.POSTFIX+auctionNr);
 		if (a != null) {
-			BigDecimal maxBid = a.getMaxBid();
-			// TODO !!! CZY ABY NA PEWNO TO TU MA BYÆ / TAK MA BYÆ? !!!
-			if ( maxBid == null || (newBid.compareTo(maxBid) <= 0) )
-				return;
-			//There's still an auction and proposed bid is high enough
+			//There's still an auction
 			ACLMessage proposition = getProposeMsg();
 			ACLMessage [] mes = {proposition};
 			fillUpReceivers(mes, getAgent(auctioneer));
@@ -257,29 +254,22 @@ public class BuyingDutchmanAgent extends GuiAgent {
 
 	
 	
-	private String reducePrices(String content) {
+	private String reducePrices() {
+		String content = new String();
 		Iterator i = ownActiveAuctions.values().iterator();
 		Hashtable h = new Hashtable();
 		while(i.hasNext()) {
-			Auction a = (Auction) i.next();			
-			if (!a.isFinished()) {
-				a.onTick();
-				content += BDC.SEPARATOR + a.getAN() 
-					+ BDC.SEPARATOR + a.getPriceInt() 
-					+ BDC.SEPARATOR + a.getPriceDec() 
-					+ BDC.SEPARATOR + a.getTicksLeft()
-					+ BDC.SEPARATOR + a.getMaxBidString()
-					+ BDC.SEPARATOR + a.getMaxBidder()
-					;
-			} else {
-				// There was a bidding
-				// TODO !!! Sprawdziæ, czy to nie chrzani programu
-				if (a.getMaxBid() != null && a.getMaxBid().compareTo(BigDecimal.ZERO) >= 0 && a.getMaxBid().compareTo(a.getPrice()) >= 0 ) {
+			Auction a = (Auction) i.next();
+			a.onTick();
+			content += BDC.SEPARATOR + a.getCfpContent();
+			if (a.isFinished()) {
+				// Auction is finished due to offer or time
+				// ocenianie ofert nie nale¿y do tej czêœci programu, poni¿sze wyciête z warunku
+				if (a.getBestBid() != null) {
 					ACLMessage reply = getAcceptProposalMsg(a);
 					ACLMessage [] mes = {reply};
 					reply.addReceiver(getAID());
-					fillUpReceivers(mes, getAgent(a.getMaxBidder()));
-					//reply.setContent();
+					fillUpReceivers(mes, getAgent(a.getBestBidder()));
 					send(reply);
 				}
 				ownFreshlyFinishedAuctions.put(a.getAN(), a);
@@ -428,14 +418,14 @@ public class BuyingDutchmanAgent extends GuiAgent {
 		}
 		private void parseProposeMessage(ACLMessage msg) {
 			String content [] = msg.getContent().split(BDC.SEPARATOR);
-			String maxBidder = msg.getSender().getLocalName();
+			String bestBidder = msg.getSender().getLocalName();
 			AID sender = msg.getSender();
 			ACLMessage reply = null;
-			if (content[0].equalsIgnoreCase(BDC.PROPOSEBUYNOW)){
+			if (content[0].equalsIgnoreCase(BDC.PROPOSEBUYNOW)) {
 				Auction a = (Auction) ownActiveAuctions.get(content[1]);
 				if (a == null)
 					return;
-				if (a.buyNow(maxBidder)) {
+				if (a.buyNow(bestBidder)) {
 					// Accepted offer to buy immediately
 					ownActiveAuctions.put(a.getAN(), a);
 					//Sending Accept_proposal message to both bidder and auctioneer
@@ -451,18 +441,22 @@ public class BuyingDutchmanAgent extends GuiAgent {
 			} else if (content[0].equalsIgnoreCase(BDC.BID)) {
 				Auction a = (Auction) ownActiveAuctions.get(content[1]);
 				if (a!=null) {
-					if (!a.propose(sender.getLocalName(), new BigDecimal(content[2]))) {
+					boolean accepted = a.propose(sender.getLocalName(), new BigDecimal(content[2]));
+					if (!accepted) {
 						reply = getRejectProposalMsg();
 						reply.addReceiver(sender);
 						send(reply);
 					}
+					String content_cfp = BDC.AUCTION+BDC.SEPARATOR+a.getCfpContent();
+					ACLMessage cfp = prepareCfpMessage(content_cfp);		
+					send(cfp);
 				} else {
 					reply = getRejectProposalMsg();
 					reply.addReceiver(sender);
 					send(reply);
 				}					
 			}
-			//Be carefull with this else block!
+			//Be careful with this else block!
 			//Be sure that it's never accidently executed 
 			else {
 				reply = getNotUnderstoodMsg();
@@ -473,39 +467,19 @@ public class BuyingDutchmanAgent extends GuiAgent {
 		private void parseCallForProposalMessage(ACLMessage msg) {
 			String content [] = msg.getContent().split(BDC.SEPARATOR);
 			String sender = msg.getSender().getLocalName();
-			// single auction after AuctionStartBehaviour
-			if (content[0].equals(BDC.AUCTION)) {
-				Auction aa = (Auction) shownAuctions.get(sender + BDC.POSTFIX + content[1]);
-				if ( aa != null) {
-					aa.onTick(
-						content[2]
-						, content[3]
-						, new Integer(content[4]).intValue()
-						, content[5]
-						, content[6]
-					);
-					setRefreshAuctionsTable(true);
-				} else {
-					ACLMessage req = getRequestMsg();
-					req.addReceiver(msg.getSender());
-					req.setContent(content[1]);
-					send(req);
-				}
-			}
-			// multiple auctions after AuctionTickBehaviour
-			else if (content[0].equals(BDC.AUCTIONS)) {
-				for (int j = 1; j < content.length; j+=6) {
-					Auction aa = (Auction) shownAuctions.get(sender + BDC.POSTFIX + content[j]);
+			if (content[0].equals(BDC.AUCTIONS) || content[0].equals(BDC.AUCTION)) {
+				for (int j = 1; j < content.length;) {
+					Auction aa = (Auction) shownAuctions.get(sender + BDC.POSTFIX + content[j++]);
 					if ( aa != null) {
 						aa.onTick(
-							content[j+1]
-							, content[j+2]
-							, new Integer(content[j+3]).intValue()
-							, content[j+4]
-							, content[j+5]          
+							content[j++]
+							, content[j++]
+							, new Integer(content[j++]).intValue()
+							, content[j++]
+							, content[j++]          
 						);
 						// If AutomaticBidder exists for this exact auction, run it
-						AutomaticBuyer ab = (AutomaticBuyer) automaticBuyers.get(sender + BDC.POSTFIX + content[j]);
+						AutomaticBuyer ab = (AutomaticBuyer) automaticBuyers.get(sender + BDC.POSTFIX + aa.getAN());
 						if (ab!=null)
 							ab.performDuty(aa);
 						setRefreshAuctionsTable(true);
@@ -546,7 +520,7 @@ public class BuyingDutchmanAgent extends GuiAgent {
 					if ( a!=null ) {
 						if (
 							a.getAuctioneer().equalsIgnoreCase(getLocalName())
-							|| a.getMaxBidder().equalsIgnoreCase(getLocalName())
+							|| a.getBestBidder().equalsIgnoreCase(getLocalName())
 						) {
 							finishedAuctions.put(a.getAuctioneerAN(), a);
 							finishedAuctionsRowNumber.add(a.getAuctioneerAN());
@@ -575,7 +549,7 @@ public class BuyingDutchmanAgent extends GuiAgent {
 		}
 	}
 	
-	// Behaviour which serves dutch auctioning
+	// Behaviour which serves as clock
 	private class AuctionTickBehaviour extends TickerBehaviour {		
     	public AuctionTickBehaviour(Agent a, long period) {
 			super(a, period);
@@ -588,12 +562,8 @@ public class BuyingDutchmanAgent extends GuiAgent {
 
 		protected void onTick() {
 			if (!ownActiveAuctions.isEmpty()) {
-				String content_cfp = BDC.AUCTIONS;
-				content_cfp = reducePrices(content_cfp);			
-				ACLMessage cfp = getCfpMsg();
-				ACLMessage mes [] = {cfp};
-				fillUpReceivers(mes, getAgents());
-				cfp.setContent(content_cfp);				
+				String content_cfp = BDC.AUCTIONS+reducePrices();
+				ACLMessage cfp = prepareCfpMessage(content_cfp);
 				send(cfp);
 				//some auctions auctioned by the agent has finished
 				if (!ownFreshlyFinishedAuctions.isEmpty()) {
@@ -604,10 +574,7 @@ public class BuyingDutchmanAgent extends GuiAgent {
 						content_finished += BDC.SEPARATOR + a.getAN();						
 					}
 					ownFreshlyFinishedAuctions.clear();
-					ACLMessage inf = getInformMsg();
-					ACLMessage mes1 [] = {inf};
-					fillUpReceivers(mes1, getAgents());
-					inf.setContent(content_finished);
+					ACLMessage inf = prepareInfMessage(content_finished);
 					send(inf);
 				}
 			}
@@ -682,6 +649,22 @@ public class BuyingDutchmanAgent extends GuiAgent {
 		return msg;
 	}
 
+	public ACLMessage prepareInfMessage(String content_finished) {
+		ACLMessage inf = getInformMsg();
+		ACLMessage mes1 [] = {inf};
+		fillUpReceivers(mes1, getAgents());
+		inf.setContent(content_finished);
+		return inf;
+	}
+
+	public ACLMessage prepareCfpMessage(String content_cfp) {
+		ACLMessage cfp = getCfpMsg();
+		ACLMessage mes [] = {cfp};
+		fillUpReceivers(mes, getAgents());
+		cfp.setContent(content_cfp);
+		return cfp;
+	}
+
 	private ACLMessage getRejectProposalMsg() {
 		ACLMessage msg = new ACLMessage(ACLMessage.REJECT_PROPOSAL);
 		msg.setSender(getAID());
@@ -694,7 +677,7 @@ public class BuyingDutchmanAgent extends GuiAgent {
 		msg.setSender(getAID());
 		msg.setOntology(BDC.BDONTO);
 		// why and what for? wouldn't be easier to send an object?
-		msg.setContent(BDC.AUCTION + BDC.SEPARATOR + a.getAN() + BDC.SEPARATOR + a.getPriceInt() + BDC.SEPARATOR + a.getPriceDec() + BDC.SEPARATOR + a.getMaxBidder());
+		msg.setContent(BDC.AUCTION + BDC.SEPARATOR + a.getAN() + BDC.SEPARATOR + a.getPriceInt() + BDC.SEPARATOR + a.getPriceDec() + BDC.SEPARATOR + a.getBestBidder());
 		return msg;
 	}
 
@@ -761,8 +744,8 @@ public class BuyingDutchmanAgent extends GuiAgent {
 			+ BDC.SEPARATOR + a.getPriceInt() 
 			+ BDC.SEPARATOR + a.getPriceDec() 
 			+ BDC.SEPARATOR + a.getTicksLeft()
-			+ BDC.SEPARATOR + a.getMaxBidString()
-			+ BDC.SEPARATOR + a.getMaxBidder()
+			+ BDC.SEPARATOR + a.getBestBidString()
+			+ BDC.SEPARATOR + a.getBestBidder()
 			;
 	}
 

@@ -2,6 +2,8 @@ package auctions;
 
 import java.math.BigDecimal;
 
+import buyingDutchmanClient.BDC;
+
 public class AuctionEnglish extends Auction {
 
 	public AuctionEnglish(AuctionDetails AD, AuctionItem AI, String AN, String Auctioneer) {
@@ -20,16 +22,27 @@ public class AuctionEnglish extends Auction {
 	}
 
 	@Override
-	protected void performAuctionTick() {
-		//English auction does not involve price reduction.
-		return;
+	protected boolean isBestBid(BigDecimal bid) {		
+		if (bid.compareTo(getPrice()) >= 0)
+			if (getBestBidder().equals(BDC.NONESTRING))
+				return true;
+			else if (bid.compareTo(getPrice()) > 0)
+				return true;
+			return false;
 	}
 
 	@Override
-	protected boolean isBestBid(BigDecimal bid) {
-		if (bid.compareTo(getMaxBid()) > 0)
-			return true;
-		else
+	public boolean propose(String bidder, BigDecimal bid) {
+		if (isFinished())
 			return false;
+		else {
+			if (isBestBid(bid)){
+				setNewPrice(bid);
+				setBestBid(bid);
+				setBestBidder(bidder);
+				return true;
+			} else
+				return false;
+		}
 	}
 }
