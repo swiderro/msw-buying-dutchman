@@ -3,10 +3,6 @@ package auctions;
 import java.math.BigDecimal;
 
 public class AuctionBidding extends Auction {
-	//TODO nie dzia³a poprawnie sk³adanie oferty dla tego typu aukcji. Do poprawy.
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 1L;
 
 	public AuctionBidding(AuctionDetails AD, AuctionItem AI, String AN, String Auctioneer) {
@@ -15,22 +11,35 @@ public class AuctionBidding extends Auction {
 
 	@Override
 	protected boolean checkFinishByOffer() {
-		// TODO A co jeœli cena zejdzie do 0?
 		return false;
 	}
 
 	@Override
-	protected void performAuctionTick() {
-		// TODO Auto-generated method stub
-		
+	protected boolean isBestBid(BigDecimal bid) {
+		if (bid.compareTo(price) < 0)
+			return true;
+		else if (bid.compareTo(price) == 0) {
+			if (getBestBid() == null)
+				return true;
+			else
+				return false;
+		} else
+			return false;
 	}
 
 	@Override
-	protected boolean isBestBid(BigDecimal bid) {
-		if (bid.compareTo(getMaxBid()) < 0)
-			return true;
-		else
+	public boolean propose(String bidder, BigDecimal bid) {
+		if (isFinished())
 			return false;
+		else {
+			if (isBestBid(bid)){
+				setNewPrice(bid);
+				setBestBid(bid);
+				setBestBidder(bidder);
+				return true;
+			} else
+				return false;
+		}
 	}
 
 

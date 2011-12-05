@@ -1,12 +1,14 @@
 package auctions;
 
+import java.math.BigDecimal;
+
 public class AutomaticBid {
 	
 	private short bidCounter;
-	private float startPrice;
+	private BigDecimal startPrice;
 	private short bidsUsed;
 	
-	public AutomaticBid(short bidCounter, float startPrice) {
+	public AutomaticBid(short bidCounter, BigDecimal startPrice) {
 		this.bidCounter = bidCounter;
 		this.startPrice = startPrice;
 		this.bidsUsed = 0;
@@ -15,7 +17,7 @@ public class AutomaticBid {
 	public short getBidCounts() {
 		return bidCounter;
 	}
-	public float getStartPrice() {
+	public BigDecimal getStartPrice() {
 		return startPrice;
 	}
 

@@ -16,5 +16,5 @@ public abstract class AutomaticBuyer implements AutomaticBuyerInterface {
 		this.agent = agent;
 		this.bid = bid;
 	}
-	public abstract void performDuty(Auction auction);
+	public abstract boolean performDuty(Auction auction);
 }

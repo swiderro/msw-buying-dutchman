@@ -4,6 +4,6 @@ import auctions.Auction;
 
 public interface AutomaticBuyerInterface {
 
-	public void performDuty(Auction auction);
+	public boolean performDuty(Auction auction);
 	
 }

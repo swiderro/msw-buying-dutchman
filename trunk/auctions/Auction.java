@@ -12,14 +12,14 @@ public abstract class Auction implements Serializable {
 	private final AuctionItem ai;
 	private final String an;
 	private final String auctioneer;
-	protected String maxBidInt;
-	protected String maxBidDec;
-	protected String maxBidder;
+	protected String bestBidInt;
+	protected String bestBidDec;
+	protected String bestBidder;
 	private boolean finished;
 	private BigDecimal reductionStep;
 	private BigDecimal endPrice;
 	protected BigDecimal price;
-	protected BigDecimal maxBid;
+	protected BigDecimal bestBid;
 	/**
 	 * @param ad
 	 * @param ai
@@ -31,14 +31,17 @@ public abstract class Auction implements Serializable {
 		this.an = AN;
 		this.finished = false;
 		this.auctioneer = Auctioneer;
-		this.maxBid = null;
-		this.maxBidInt = null;
-		this.maxBidDec = null;
-		setMaxBidder(null);
+		this.bestBid = null;
+		this.bestBidInt = null;
+		this.bestBidDec = null;
+		setBestBidder(null);
 		setPrice(computePrice());
 		setEndPrice(computeEndPrice());
 		int time = ((AD.getStartTicks())/BDC.TICK);		
 		setReductionStep(getPrice().subtract(getEndPrice()).divide(new BigDecimal(time), BDC.BigDecimalScale, BDC.BigDecimalRounding));
+	}
+	private void setPrice(BigDecimal computePrice) {
+		this.price = computePrice;
 	}
 	private BigDecimal computeEndPrice() {		
 		return new BigDecimal(getAd().getEndPriceInt()+BDC.FPOINT+getAd().getEndPriceDec());
@@ -77,10 +80,8 @@ public abstract class Auction implements Serializable {
 	//Dla ka¿dego typu aukcji mo¿e byæ inny, wiêc jest zadeklarowany jako abstract
 	protected abstract boolean checkFinishByOffer();
 	//Wykonuje czynnoœci aukcji zwi¹zan¹ z zegarem, takie jak obni¿enie ceny.
-	//Dla ka¿dego typu aukcji mo¿e byæ inny, wiêc jest zadeklarowany jako abstract
-	// TODO Czy powy¿sze jest prawd¹? Tak naprawdê, to tylko aukcja holenderska manipuluje cen¹ w czasie z automatu.
-	// TODO Zobaczyæ, jak to jest zaimplementowane w aukcjach innych ni¿ holenderska.
-	protected abstract void performAuctionTick();
+	//U¿ywana w aukcjach manipuluj¹cych cen¹ wg wskazañ zegara. W tej aplikacji w holenderskiej i groszowej.
+	protected void performAuctionTick(){};
 	public final void performFinish(){
 		setFinished(true);
 		String [] i = getPrice().toPlainString().split(BDC.REGEXFPOINT);
@@ -97,33 +98,37 @@ public abstract class Auction implements Serializable {
 		if (isFinished())
 			return;
 		setTicksLeft(getTicksLeft()-BDC.TICK);
-		if (getTicksLeft() > 0) {
+		if (getTicksLeft() >= 0) {
 			performAuctionTick();
 			if(checkFinishByOffer())
 				performFinish();
-		} else
-			performFinish();		
+		} else {
+			setTicksLeft(0);
+			performFinish();
+		}
 	}
 	//odpalane na aukcji po stronie agenta obserwuj¹cego
-	public void onTick(String priceInt, String priceDec, int ticksLeft, String MaxBid, String MaxBidder) {	
+	public void onTick(String priceInt, String priceDec, int ticksLeft, String bestBid, String bestBidder) {	
 		if (isFinished())
 			return;
+		getAd().setPriceDec(priceDec);
+		getAd().setPriceInt(priceInt);
 		setPrice(new BigDecimal(priceInt+BDC.FPOINT+priceDec));
 		setTicksLeft(ticksLeft);
-		if (!MaxBid.equalsIgnoreCase(BDC.NONESTRING))
-			setMaxBid(MaxBid);
-		if (!MaxBidder.equalsIgnoreCase(BDC.NONESTRING))
-			setMaxBidder(MaxBidder);
+		if (!bestBid.equalsIgnoreCase(BDC.NONESTRING))
+			setBestBid(bestBid);
+		if (!bestBidder.equalsIgnoreCase(BDC.NONESTRING))
+			setBestBidder(bestBidder);
 	}
-	private void setMaxBid(String MaxBid) {
-		maxBid = new BigDecimal(maxBidInt+BDC.FPOINT+maxBidDec);
-		String [] i = maxBid.toPlainString().split(BDC.REGEXFPOINT);
+	private void setBestBid(String bestBid) {
+		this.bestBid = new BigDecimal(bestBid);
+		String [] i = this.bestBid.toPlainString().split(BDC.REGEXFPOINT);
 		if (i[1].length() >= 2) {
-			maxBidDec = i[1].substring(0, 2);
-			maxBidInt = i[0];
+			bestBidDec = i[1].substring(0, 2);
+			bestBidInt = i[0];
 		} else {
-			maxBidDec = i[1]+"0";
-			maxBidInt = i[0];
+			bestBidDec = i[1]+"0";
+			bestBidInt = i[0];
 		}
 	}
 	public String getTitle() {		
@@ -135,18 +140,18 @@ public abstract class Auction implements Serializable {
 	public String getAuctioneerAN() {
 		return auctioneer+BDC.POSTFIX+an;
 	}
-	public final String getMaxBidString() {
-		if (maxBid != null && isFinished())
-			return maxBid.toString();		
+	public final String getBestBidString() {
+		if (bestBid != null && isFinished())
+			return bestBid.toString();		
 		else
 			return BDC.NONESTRING;
 	}
-	public final BigDecimal getMaxBid() {
-		return maxBid;
+	public final BigDecimal getBestBid() {
+		return bestBid;
 	}
-	public String getMaxBidder() {	
-		if (maxBidder != null && !maxBidder.equalsIgnoreCase(""))
-			return maxBidder;
+	public String getBestBidder() {	
+		if (bestBidder != null && !bestBidder.equalsIgnoreCase(""))
+			return bestBidder;
 		else
 			return BDC.NONESTRING;
 	}
@@ -159,8 +164,8 @@ public abstract class Auction implements Serializable {
 		case 4: return getSubCategory();
 		case 5: return getTicksLeft()/BDC.TICK;
 		case 6: return getPriceInt()+BDC.POINT+getPriceDec();
-		case 7: return getMaxBidString();
-		case 8: return getMaxBidder();
+		case 7: return getBestBidString();
+		case 8: return getBestBidder();
 		case 9: return getTitle();
 		}
 		return null;
@@ -183,63 +188,43 @@ public abstract class Auction implements Serializable {
 		case 4: return getSubCategory();
 		case 5: return getTicksLeft()/BDC.TICK;
 		case 6: return getPriceInt()+BDC.POINT+getPriceDec();
-		case 7: return getMaxBidString();
-		case 8: return getMaxBidder();
+		case 7: return getBestBidString();
+		case 8: return getBestBidder();
 		case 9: return getTitle();
 		}
 		return null;
 	}
 	// Mo¿na by daæ to jako abstract, ale tak naprawdê tylko w aukcji holenderskiej jest opcja kup teraz.
 	// Dlatego te¿ zostawiam tu domyœlne zachowanie, a przes³aniam w holenderskiej.
-	public boolean buyNow(String MaxBidder) {
+	public boolean buyNow(String bestBidder) {
 		return false;
 	}
-	public void buyNow(String MaxBidder, String MaxBidInt, String MaxBidDec) {
-		setMaxBidder(MaxBidder);
-		setMaxBidInt(MaxBidInt);
-		setMaxBidDec(MaxBidDec);
-		setMaxBid(maxBidInt+BDC.FPOINT+maxBidDec);
+	public void buyNow(String bestBidder, String bestBidInt, String bestBidDec) {
+		setBestBidder(bestBidder);
+		setBestBidInt(bestBidInt);
+		setBestBidDec(bestBidDec);
+		setBestBid(bestBidInt+BDC.FPOINT+bestBidDec);
 		return;
 	}
-	private void setMaxBidDec(String maxBidDec2) {
-		maxBidDec = maxBidDec2;
+	private void setBestBidDec(String bestBidDec2) {
+		bestBidDec = bestBidDec2;
 	}
-	private void setMaxBidInt(String maxBidInt2) {
-		maxBidInt = maxBidInt2;
+	private void setBestBidInt(String bestBidInt2) {
+		bestBidInt = bestBidInt2;
 	}
-	// Inaczej obs³ugiwane w aukcji drugiej ceny
-	// Inaczej obs³ugiwane w przetargu
-	// Nie wystêpuje w aukcji groszowej
-	// Nie wystêpuje w aukcji holenderskiej
-	// Jak poni¿ej dla aukcji angielskiej
-	// TODO Przerobiæ na abstract i zaimplementowaæ w poszczególnych klasach aukcji.
-	public final boolean propose(String bidder, BigDecimal bid) {
-		if (isFinished())
-			return false;
-		else {
-			if (isBestBid(bid)){
-				// TODO Tutaj setPrice MUSI byæ przed setMaxBid
-				// inaczej wypierdzieli siê aukcja drugiej ceny
-				// Kurwa, a mo¿e to zmieniæ ?
-				setPrice(bid);
-				setMaxBid(bid);
-				setMaxBidder(bidder);
-				return true;
-			} else
-				return false;
-		}
-	}
+	public boolean propose(String bidder, BigDecimal bid) {return false;};
+	
 	// metoda okreœla, czy z³o¿ona oferta jest lepsza od obowi¹zuj¹cej
 	protected abstract boolean isBestBid(BigDecimal bid);
 	
-	protected void setMaxBidder(String bidder) {
-		maxBidder = bidder;		
+	protected void setBestBidder(String bidder) {
+		bestBidder = bidder;		
 	}
 	public BigDecimal getPrice() {
 		//return Float.valueOf(getAd().getPriceInt()+BDC.FPOINT+getAd().getPriceDec()).floatValue();
 		return this.price;
 	}
-	protected void setPrice(BigDecimal bid) {
+	protected void setNewPrice(BigDecimal bid) {
 		 this.price = bid;
 		 String [] p = this.price.toPlainString().split(BDC.REGEXFPOINT);
 		 if (p[1].length() >= 2) {
@@ -262,7 +247,15 @@ public abstract class Auction implements Serializable {
 	public BigDecimal getEndPrice() {
 		return endPrice;
 	}
-	public void setMaxBid(BigDecimal maxBid) {
-		this.maxBid = maxBid;
+	public void setBestBid(BigDecimal bestBid) {
+		this.bestBid = bestBid;
+	}
+	public String getCfpContent() {		
+		return getAN()
+		+ BDC.SEPARATOR + getPriceInt() 
+		+ BDC.SEPARATOR + getPriceDec() 
+		+ BDC.SEPARATOR + getTicksLeft()
+		+ BDC.SEPARATOR + getBestBidString()
+		+ BDC.SEPARATOR + getBestBidder();
 	}
 }

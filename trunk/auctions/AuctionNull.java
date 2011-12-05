@@ -18,11 +18,12 @@ public class AuctionNull extends Auction {
 	}
 
 	@Override
-	protected void performAuctionTick() {		
+	protected boolean isBestBid(BigDecimal bid) {
+		return false;
 	}
 
 	@Override
-	protected boolean isBestBid(BigDecimal bid) {
+	public boolean propose(String bidder, BigDecimal bid) {
 		return false;
 	}
 

@@ -12,7 +12,13 @@ public class AutomaticBuyerFactory{
 		switch (type) {
 		case HOLENDERSKA:
 			return new AutomaticBuyerDutch(agent, bid);
-		}
+		case ANGIELSKA:
+			return new AutomaticBuyerEnglish(agent, bid);
+		case DRUGIEJ_CENY:
+			return new AutomaticBuyerSecondPrice(agent, bid);
+		case PRZETARG:
+			return new AutomaticBuyerBidding(agent, bid);
+		}	
 		return null;		
 	}
 }
