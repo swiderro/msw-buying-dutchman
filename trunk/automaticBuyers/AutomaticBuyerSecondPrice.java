@@ -7,11 +7,12 @@ import buyingDutchmanClient.BuyingDutchmanAgent;
 import buyingDutchmanClient.BDC.AuctionTypes;
 import auctions.Auction;
 
-public class AutomaticBuyerEnglish extends AutomaticBuyer {
+public class AutomaticBuyerSecondPrice extends AutomaticBuyer {
 	private BigDecimal upBid;
-	public AutomaticBuyerEnglish(BuyingDutchmanAgent agent, BigDecimal bid, BigDecimal upBid) {
+	
+	public AutomaticBuyerSecondPrice(BuyingDutchmanAgent agent, BigDecimal bid, BigDecimal upBid) {
 		super(agent, bid);
-		this.type = AuctionTypes.ANGIELSKA;
+		this.type = AuctionTypes.DRUGIEJ_CENY;
 		this.upBid = upBid;
 	}
 
@@ -31,7 +32,7 @@ public class AutomaticBuyerEnglish extends AutomaticBuyer {
 				return false;
 			}
 		} else if (a.getPrice().compareTo(this.bid) < 0) {
-			if (!a.getBestBidder().equals(agent.getLocalName())) {	
+			if (!a.getBestBidder().equals(agent.getLocalName())) {				
 				if (a.getBestBidder().equals(BDC.NONESTRING)) {
 					newBid = a.getPrice();
 				} else {
@@ -52,4 +53,5 @@ public class AutomaticBuyerEnglish extends AutomaticBuyer {
 			return false;
 		}
 	}
+
 }

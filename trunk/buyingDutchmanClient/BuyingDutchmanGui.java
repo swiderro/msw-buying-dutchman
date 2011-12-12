@@ -130,6 +130,7 @@ public class BuyingDutchmanGui extends JFrame {
 			e.addParameter(jTFAuctionNr.getText().trim());
 			e.addParameter(jTFAuctioneer.getText().trim());
 			e.addParameter(jTFBidPriceInt.getText().trim()+BDC.FPOINT+jTFBidPriceDec.getText().trim());
+			e.addParameter(jTFUpBidInt.getText().trim()+BDC.FPOINT+jTFUpBidDec.getText().trim());
 			myAgent.postGuiEvent(e);
 		}
 
@@ -229,6 +230,14 @@ public class BuyingDutchmanGui extends JFrame {
 	private JComboBox jCBAutionType;  //  @jve:decl-index=0:
 
 	private JButton jBWaitAndBuy = null;
+
+	private JLabel jLUpbid = null;
+
+	private JLabel jLDecimalPointUpBid = null;
+
+	private JTextField jTFUpBidDec = null;
+
+	private JTextField jTFUpBidInt = null;
 
 	/**
 	 * This method initializes 
@@ -484,6 +493,10 @@ public class BuyingDutchmanGui extends JFrame {
 	 */
 	private JPanel getJPAuctionCommand() {
 		if (jPAuctionCommand == null) {
+			jLDecimalPointUpBid = new JLabel();
+			jLDecimalPointUpBid.setText(BDC.DECIMALPOINT);
+			jLUpbid = new JLabel();
+			jLUpbid.setText(BDC.UPBID);
 			jLAuctioner = new JLabel();
 			jLAuctioner.setText(BDC.AUCTIONEER);
 			jLAuctionNr = new JLabel();
@@ -503,12 +516,16 @@ public class BuyingDutchmanGui extends JFrame {
 			jPAuctionCommand.add(jLAuctionNr, null);
 			jPAuctionCommand.add(getJTFAuctionNr(), null);
 			jPAuctionCommand.add(getJBBuyNow(), null);
+			jPAuctionCommand.add(getJBProposition(), null);
 			jPAuctionCommand.add(jLWaitForPrice, null);
 			jPAuctionCommand.add(getJTFBidPriceInt(new JTFIntLength()), null);
 			jPAuctionCommand.add(jLDecimalPoint, null);
 			jPAuctionCommand.add(getJTFBidPriceDec(new JTFDecLength()), null);
 			jPAuctionCommand.add(getJBWaitAndBuy(), null);
-			jPAuctionCommand.add(getJBProposition(), null);
+			jPAuctionCommand.add(jLUpbid, null);
+			jPAuctionCommand.add(getJTFUpBidInt(new JTFIntLength()), null);
+			jPAuctionCommand.add(jLDecimalPointUpBid, null);
+			jPAuctionCommand.add(getJTFUpBidDec(new JTFDecLength()), null);
 		}
 		return jPAuctionCommand;
 	}
@@ -892,7 +909,7 @@ public class BuyingDutchmanGui extends JFrame {
 		
 		JTFIntLength() {
 			super();
-			this.limit = 6;
+			this.limit = 4;
 		}	   	  
 		
 		public void insertString(int offset, String  str, AttributeSet attr) {
@@ -1060,6 +1077,38 @@ public class BuyingDutchmanGui extends JFrame {
 			jBWaitAndBuy.addActionListener(new ActionWaitAndBuy());
 		}
 		return jBWaitAndBuy;
+	}
+
+	/**
+	 * This method initializes jTFBidPriceDecUpBid	
+	 * @param doc 
+	 * 	
+	 * @return javax.swing.JTextField	
+	 */
+	private JTextField getJTFUpBidDec(PlainDocument doc) {
+		if (jTFUpBidDec == null) {
+			jTFUpBidDec = new JTextField(BDC.PRICEDECCOLUMNS);
+			jTFUpBidDec.setDocument(doc);
+			// TODO Switch to commented after testing
+			jTFUpBidDec.setText("5");
+			// jTFBidPriceInt.setText(BDC.PRICESTARTDEF);
+		}
+		return jTFUpBidDec;
+	}
+
+	/**
+	 * This method initializes jTFUpBidInt	
+	 * @param doc 
+	 * 	
+	 * @return javax.swing.JTextField	
+	 */
+	private JTextField getJTFUpBidInt(PlainDocument doc) {
+		if (jTFUpBidInt == null) {
+			jTFUpBidInt = new JTextField(BDC.PRICEINTCOLUMNS);
+			jTFUpBidInt.setDocument(doc);
+			jTFUpBidInt.setText(BDC.PRICESTARTDEF);
+		}
+		return jTFUpBidInt;
 	}
 	
 }

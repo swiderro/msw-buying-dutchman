@@ -1,7 +1,6 @@
 package buyingDutchmanClient;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.util.HashMap;
 
 public final class BDC {
@@ -19,7 +18,7 @@ public final class BDC {
 		50, 80, 60, 60, 60, 60, 40, 60, 70, 210
 	};
 	public static final int[] FINISHEDAUCTIONSCOLUMNWIDTH = {
-		50, 80, 60, 60, 60, 60, 40, 60, 70, 200
+		50, 80, 60, 60, 60, 60, 40, 60, 70, 210
 	};
 	public static final String BDONTO = "bd-ontology";
 	public static final String SDTYPELISTENER = "bd-agent";
@@ -54,6 +53,7 @@ public final class BDC {
 	public static final int WAITBUYAUCTIONNRPARAMNUM = 0;
 	public static final int WAITBUYAUCTIONEERPARAMNUM = 1;
 	public static final int WAITBUYBIDPARAMNUM = 2;
+	public static final int WAITBUYUPBIDPARAMNUM = 3;
 	public static final int PROPOSEAUCTIONNRPARAMNUM = 0;
 	public static final int PROPOSEAUCTIONEERPARAMNUM = 1;
 	public static final int PROPOSEBIDPARAMNUM = 2;
@@ -62,7 +62,7 @@ public final class BDC {
 	//BuyingDutchmanGui Consts
 	//FRAME CONSTS
 	public static final String FRAMETITLE = "Buying Dutchman";  
-	public static final int FRAMEWIDTH = 850;
+	public static final int FRAMEWIDTH = 900;
 	public static final int FRAMEHEIGHT = 400;
 	//TABS CONSTS
 	public static final String AUCTIONSTAB = "Aukcje";
@@ -102,6 +102,7 @@ public final class BDC {
 	public static final String FINISHEDAUCTIONSTAB = "Moje aukcje";
 	public static final String CATEGORYLABEL = "Kategoria";
 	public static final String AUCTIONTYPELABEL = "Typ aukcji";
+	public static final String UPBID = "Podbijaj o:";
 	//CATEGORIES
 	private static final String ANTIQUES = "Antyki";
 	private static final String COLLECTIONS = "Kolekcje";
