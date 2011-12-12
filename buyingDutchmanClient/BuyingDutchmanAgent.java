@@ -146,6 +146,7 @@ public class BuyingDutchmanAgent extends GuiAgent {
 				(String) ev.getParameter(BDC.WAITBUYAUCTIONNRPARAMNUM)
 				, (String) ev.getParameter(BDC.WAITBUYAUCTIONEERPARAMNUM)
 				, new BigDecimal((String)ev.getParameter(BDC.WAITBUYBIDPARAMNUM))
+				, new BigDecimal((String)ev.getParameter(BDC.WAITBUYUPBIDPARAMNUM))
 			);
 		}
 		if (ev.getType() == BDC.GUICLOSE) {
@@ -153,15 +154,16 @@ public class BuyingDutchmanAgent extends GuiAgent {
 		}
 	}	
 
-	private void waitAndBuy(String auctionNr, String auctioneer, BigDecimal bid) {
+	private void waitAndBuy(String auctionNr, String auctioneer, BigDecimal bid, BigDecimal upBid) {
 		if (fraudBid(auctioneer))
 			return;
 		Auction a = (Auction) shownAuctions.get(auctioneer+BDC.POSTFIX+auctionNr);
 		if (a != null) {
-			AutomaticBuyer ab = AutomaticBuyerFactory.AutomaticBuyerInstance(this, bid, a.getType());
+			AutomaticBuyer ab = AutomaticBuyerFactory.AutomaticBuyerInstance(this, bid, upBid, a.getType());
 			if (ab != null) {
 				automaticBuyers.put(auctioneer+BDC.POSTFIX+auctionNr,ab);
-				ab.performDuty(a);
+				if (!ab.performDuty(a))
+					automaticBuyers.remove(auctioneer+BDC.POSTFIX+auctionNr);
 			}
 		} else
 			return;
@@ -481,7 +483,8 @@ public class BuyingDutchmanAgent extends GuiAgent {
 						// If AutomaticBidder exists for this exact auction, run it
 						AutomaticBuyer ab = (AutomaticBuyer) automaticBuyers.get(sender + BDC.POSTFIX + aa.getAN());
 						if (ab!=null)
-							ab.performDuty(aa);
+							if(!ab.performDuty(aa))
+								automaticBuyers.remove(sender + BDC.POSTFIX + aa.getAN());
 						setRefreshAuctionsTable(true);
 					} else {
 						// Auction is running, but it isn't shown yet.

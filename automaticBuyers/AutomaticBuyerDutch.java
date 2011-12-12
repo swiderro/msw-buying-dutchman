@@ -14,9 +14,11 @@ public class AutomaticBuyerDutch extends AutomaticBuyer {
 	}
 
 	@Override
-	public void performDuty(Auction auction) {		
-		if (auction.getPrice().compareTo(this.bid) <= 0)
+	public boolean performDuty(Auction auction) {		
+		if (auction.getPrice().compareTo(this.bid) <= 0) {
 			this.agent.buyNow(auction.getAuctioneer(), auction.getAN());
+		}
+		return true;
 	}
 
 }

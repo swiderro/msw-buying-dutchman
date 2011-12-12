@@ -7,17 +7,17 @@ import buyingDutchmanClient.BuyingDutchmanAgent;
 
 public class AutomaticBuyerFactory{
 	// klasa odpowiada za produkowanie obiektów obs³uguj¹cych przyciœniêcie guzika "Oczekuj i kup"
-	public static AutomaticBuyer AutomaticBuyerInstance(BuyingDutchmanAgent agent, BigDecimal bid, BDC.AuctionTypes type) {
+	public static AutomaticBuyer AutomaticBuyerInstance(BuyingDutchmanAgent agent, BigDecimal bid, BigDecimal upBid, BDC.AuctionTypes type) {
 		// TODO Dodaæ dla aukcji: groszowej, angielskiej, przetargu. Dla aukcji drugiej ceny zmiana aktualnej ceny musi byæ obslugiwana przez sam¹ aukcjê.
 		switch (type) {
 		case HOLENDERSKA:
 			return new AutomaticBuyerDutch(agent, bid);
 		case ANGIELSKA:
-			return new AutomaticBuyerEnglish(agent, bid);
+			return new AutomaticBuyerEnglish(agent, bid, upBid);
 		case DRUGIEJ_CENY:
-			return new AutomaticBuyerSecondPrice(agent, bid);
+			return new AutomaticBuyerSecondPrice(agent, bid, upBid);
 		case PRZETARG:
-			return new AutomaticBuyerBidding(agent, bid);
+			return new AutomaticBuyerBidding(agent, bid, upBid);
 		}	
 		return null;		
 	}
