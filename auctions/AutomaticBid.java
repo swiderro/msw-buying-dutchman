@@ -4,17 +4,17 @@ import java.math.BigDecimal;
 
 public class AutomaticBid {
 	
-	private short bidCounter;
+	private int bidCounter;
 	private BigDecimal startPrice;
-	private short bidsUsed;
+	private int bidsUsed;
 	
-	public AutomaticBid(short bidCounter, BigDecimal startPrice) {
+	public AutomaticBid(int bidCounter, BigDecimal startPrice) {
 		this.bidCounter = bidCounter;
 		this.startPrice = startPrice;
 		this.bidsUsed = 0;
 	}
 	
-	public short getBidCounts() {
+	public int getBidCounts() {
 		return bidCounter;
 	}
 	public BigDecimal getStartPrice() {
@@ -30,7 +30,7 @@ public class AutomaticBid {
 			return false;
 	}
 
-	public short getBidsUsed() {
+	public int getBidsUsed() {
 		return bidsUsed;
 	}
 	

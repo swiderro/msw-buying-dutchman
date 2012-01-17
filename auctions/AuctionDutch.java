@@ -27,20 +27,23 @@ public class AuctionDutch extends Auction {
 	}
 	@Override
 	public boolean buyNow(String bestBidder) {
+		//TODO sprawdziæ przypisania bestBidInt bestBidDec
 		if (isFinished())
 			return false;
 		else {
-			setBestBidder(bestBidder);
 			bestBidInt = getPriceInt();
 			bestBidDec = getPriceDec();
-			bestBid = new BigDecimal(bestBidInt+BDC.FPOINT+bestBidDec);
+			setBestBid(new BigDecimal(bestBidInt+BDC.FPOINT+bestBidDec), bestBidder);
 			setFinished(true);
 			return true;
 		}
 	}
 	@Override
 	protected void performAuctionTick() {
-		setNewPrice(getPrice().subtract(getReductionStep()));
+		setNewPrice(
+			getPrice().subtract(getReductionStep())
+			, getBestBidder()
+		);
 	}
 
 	@Override

@@ -19,8 +19,7 @@ public class AutomaticBuyerBidding extends AutomaticBuyer {
 
 	@Override
 	public boolean performDuty(Auction a) {
-		// TODO Trzeba umo¿liwiæ dowolne wybieranie upBid. To z kolei skomplikuje gui jeszcze bardziej.
-		// TODO Trzeba wiêc gui licytowania przerobiæ tak, by by³y pokazywane oddzielne paski licytowania dla ka¿dego typu aukcji.
+		// TODO ??? Trzeba wiêc gui licytowania przerobiæ tak, by by³y pokazywane oddzielne paski licytowania dla ka¿dego typu aukcji.
 //		BigDecimal newBid;
 //		if (!a.getBestBidder().equals(agent.getLocalName()))
 //			if (a.getPrice().compareTo(this.bid) >= 0) {
