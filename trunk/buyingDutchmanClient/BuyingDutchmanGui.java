@@ -239,6 +239,10 @@ public class BuyingDutchmanGui extends JFrame {
 
 	private JTextField jTFUpBidInt = null;
 
+	private JScrollPane jSPAuctionBidHistory = null;
+
+	private JTable jTAuctionBidHistory = null;
+
 	/**
 	 * This method initializes 
 	 * 
@@ -299,12 +303,19 @@ public class BuyingDutchmanGui extends JFrame {
 	 */
 	private JPanel getJPAuctions() {
 		if (jPAuctions == null) {
+			GridBagConstraints gridBagConstraints51 = new GridBagConstraints();
+			gridBagConstraints51.fill = GridBagConstraints.BOTH;
+			gridBagConstraints51.gridy = 2;
+			gridBagConstraints51.weightx = 1.0;
+			gridBagConstraints51.weighty = 1.0;
+			gridBagConstraints51.gridx = 1;
 			GridBagConstraints gridBagConstraints2 = new GridBagConstraints();
 			gridBagConstraints2.fill = GridBagConstraints.BOTH;
 			gridBagConstraints2.gridx = 0;
 			gridBagConstraints2.weighty = 0.0;
 			gridBagConstraints2.gridy = 1;
 			gridBagConstraints2.weightx = 1.0;
+			gridBagConstraints2.gridwidth = 2;
 			GridBagConstraints gridBagConstraints1 = new GridBagConstraints();
 			gridBagConstraints1.fill = GridBagConstraints.BOTH;
 			gridBagConstraints1.weighty = 0.5;
@@ -317,11 +328,13 @@ public class BuyingDutchmanGui extends JFrame {
 			gridBagConstraints.weightx = 1.0;
 			gridBagConstraints.gridx = 0;
 			gridBagConstraints.gridy = 0;
+			gridBagConstraints.gridwidth = 2;
 			jPAuctions = new JPanel();
 			jPAuctions.setLayout(new GridBagLayout());
 			jPAuctions.add(getJSPAuctions(), gridBagConstraints);
 			jPAuctions.add(getJPAuctionCommand(), gridBagConstraints2);
 			jPAuctions.add(getJSPAuctionDescription(), gridBagConstraints1);
+			jPAuctions.add(getJSPAuctionBidHistory(), gridBagConstraints51);
 		}
 		return jPAuctions;
 	}
@@ -1109,6 +1122,31 @@ public class BuyingDutchmanGui extends JFrame {
 			jTFUpBidInt.setText(BDC.PRICESTARTDEF);
 		}
 		return jTFUpBidInt;
+	}
+
+	/**
+	 * This method initializes jSPAuctionBidHistory	
+	 * 	
+	 * @return javax.swing.JScrollPane	
+	 */
+	private JScrollPane getJSPAuctionBidHistory() {
+		if (jSPAuctionBidHistory == null) {
+			jSPAuctionBidHistory = new JScrollPane();
+			jSPAuctionBidHistory.setViewportView(getJTAuctionBidHistory());
+		}
+		return jSPAuctionBidHistory;
+	}
+
+	/**
+	 * This method initializes jTAuctionBidHistory	
+	 * 	
+	 * @return javax.swing.JTable	
+	 */
+	private JTable getJTAuctionBidHistory() {
+		if (jTAuctionBidHistory == null) {
+			jTAuctionBidHistory = new JTable();
+		}
+		return jTAuctionBidHistory;
 	}
 	
 }

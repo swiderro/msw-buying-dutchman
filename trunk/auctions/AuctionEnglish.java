@@ -37,9 +37,8 @@ public class AuctionEnglish extends Auction {
 			return false;
 		else {
 			if (isBestBid(bid)){
-				setNewPrice(bid);
-				setBestBid(bid);
-				setBestBidder(bidder);
+				setNewPrice(bid, bidder);
+				setBestBid(bid, bidder);
 				return true;
 			} else
 				return false;

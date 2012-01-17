@@ -2,6 +2,7 @@ package auctions;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.util.ArrayList;
 
 import buyingDutchmanClient.BDC;
 import buyingDutchmanClient.BDC.AuctionTypes;
@@ -20,6 +21,7 @@ public abstract class Auction implements Serializable {
 	private BigDecimal endPrice;
 	protected BigDecimal price;
 	protected BigDecimal bestBid;
+	private ArrayList bidsHistory;
 	/**
 	 * @param ad
 	 * @param ai
@@ -82,8 +84,9 @@ public abstract class Auction implements Serializable {
 	//Wykonuje czynnoœci aukcji zwi¹zan¹ z zegarem, takie jak obni¿enie ceny.
 	//U¿ywana w aukcjach manipuluj¹cych cen¹ wg wskazañ zegara. W tej aplikacji w holenderskiej i groszowej.
 	protected void performAuctionTick(){};
-	public final void performFinish(){
+	public void performFinish(){
 		setFinished(true);
+		setTicksLeft(0);
 		String [] i = getPrice().toPlainString().split(BDC.REGEXFPOINT);
 		if (i[1].length() >= 2) {
 			getAd().setPriceDec(i[1].substring(0, 2));
@@ -103,7 +106,6 @@ public abstract class Auction implements Serializable {
 			if(checkFinishByOffer())
 				performFinish();
 		} else {
-			setTicksLeft(0);
 			performFinish();
 		}
 	}
@@ -217,23 +219,30 @@ public abstract class Auction implements Serializable {
 	// metoda okreœla, czy z³o¿ona oferta jest lepsza od obowi¹zuj¹cej
 	protected abstract boolean isBestBid(BigDecimal bid);
 	
-	protected void setBestBidder(String bidder) {
+	private final void setBestBidder(String bidder) {
 		bestBidder = bidder;		
 	}
 	public BigDecimal getPrice() {
 		//return Float.valueOf(getAd().getPriceInt()+BDC.FPOINT+getAd().getPriceDec()).floatValue();
 		return this.price;
 	}
-	protected void setNewPrice(BigDecimal bid) {
-		 this.price = bid;
-		 String [] p = this.price.toPlainString().split(BDC.REGEXFPOINT);
-		 if (p[1].length() >= 2) {
-			 getAd().setPriceDec(p[1].substring(0, 2));
-			 getAd().setPriceInt(p[0]);
-		 } else {
-			 getAd().setPriceDec(p[1]+"0");
-			 getAd().setPriceInt(p[0]);
-		 }		 
+	protected final void setNewPrice(BigDecimal bid, String bidder) {
+		setBestBidder(bidder);
+		setNewPrice(bid);
+		//TODO 2 Zrobienie historii sk³adanych ofert.
+		bidsHistory.add(new Bid(bidder, bid));
+	}
+	private void setNewPrice(BigDecimal bid) {
+		//TODO test Po³¹czyæ z setBestBidder. Brawo, bo bêdzie mnóstwo testowania
+		this.price = bid;
+		String [] p = this.price.toPlainString().split(BDC.REGEXFPOINT);
+		if (p[1].length() >= 2) {
+			getAd().setPriceDec(p[1].substring(0, 2));
+			getAd().setPriceInt(p[0]);
+		} else {
+			getAd().setPriceDec(p[1]+"0");
+			getAd().setPriceInt(p[0]);
+		}
 	}
 	public void setReductionStep(BigDecimal reductionStep) {
 		this.reductionStep = reductionStep;
@@ -247,7 +256,11 @@ public abstract class Auction implements Serializable {
 	public BigDecimal getEndPrice() {
 		return endPrice;
 	}
-	public void setBestBid(BigDecimal bestBid) {
+	protected void setBestBid(BigDecimal bestBid, String bidder) {
+		setBestBid(bestBid);
+		setBestBidder(bidder);
+	}
+	private void setBestBid(BigDecimal bestBid) {
 		this.bestBid = bestBid;
 	}
 	public String getCfpContent() {		

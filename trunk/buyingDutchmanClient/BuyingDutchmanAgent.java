@@ -8,6 +8,8 @@ import java.util.Hashtable;
 import javax.swing.table.AbstractTableModel;
 
 import auctions.Auction;
+import auctions.AuctionPenny;
+import auctions.AutomaticBid;
 import automaticBuyers.AutomaticBuyer;
 import automaticBuyers.AutomaticBuyerFactory;
 
@@ -204,7 +206,7 @@ public class BuyingDutchmanAgent extends GuiAgent {
 	    }
 		return null;
 	}
-	private DFAgentDescription[] getAgent(String name) {
+	public DFAgentDescription[] getAgent(String name) {
 	    try {
 	    	DFAgentDescription dfad = getLightDFAgentDescription();
 	    	AID aid = new AID(name, false);
@@ -282,7 +284,7 @@ public class BuyingDutchmanAgent extends GuiAgent {
 		i = h.values().iterator();
 		while (i.hasNext()){
 			Auction a = (Auction)i.next();
-			ownActiveAuctions.remove(a.getAN());			
+			ownActiveAuctions.remove(a.getAN());
 		}
 		return content;
 	}
@@ -296,7 +298,7 @@ public class BuyingDutchmanAgent extends GuiAgent {
 	}
 	
 	// Creates empty request message, with sender as this and BDOntology
-	private ACLMessage getRequestMsg() {
+	public ACLMessage getRequestMsg() {
 		ACLMessage msg = new ACLMessage(ACLMessage.REQUEST);
 		msg.setSender(getAID());
 		msg.setOntology(BDC.BDONTO);				
@@ -312,7 +314,7 @@ public class BuyingDutchmanAgent extends GuiAgent {
 	}
 	
 	// Fills up message with known BD Agents
-	private void fillUpReceivers(ACLMessage[] messages, DFAgentDescription[] r) {
+	public void fillUpReceivers(ACLMessage[] messages, DFAgentDescription[] r) {
 		if (r != null) {
 			for (int j = 0; j < messages.length; j++) {
 				for (int i = 0; i < r.length; i++) {
@@ -490,7 +492,7 @@ public class BuyingDutchmanAgent extends GuiAgent {
 						// Auction is running, but it isn't shown yet.
 						ACLMessage req = getRequestMsg();
 						req.addReceiver(msg.getSender());
-						req.setContent(content[j]);
+						req.setContent(BDC.AUCTION_INFO+BDC.SEPARATOR+content[1]);
 						send(req);
 					}					
 				}
@@ -498,16 +500,24 @@ public class BuyingDutchmanAgent extends GuiAgent {
 		}
 		private void parseRequestMessage(ACLMessage msg) {
 			String content [] = msg.getContent().split(BDC.SEPARATOR);
-			ACLMessage inform = getInformRefMsg();
-			inform.addReceiver(msg.getSender());
-			Auction a = (Auction) ownActiveAuctions.get(content[0]);
-			if (a != null)
-				try {
-					inform.setContentObject(a);
-					send(inform); 
-				} catch (IOException e) {
-					e.printStackTrace();
-				}									   	
+			if (content[0].equals(BDC.AUCTION_INFO)) {
+				ACLMessage inform = getInformRefMsg();
+				inform.addReceiver(msg.getSender());
+				Auction a = (Auction) ownActiveAuctions.get(content[1]);
+				if (a != null)
+					try {
+						inform.setContentObject(a);
+						send(inform); 
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+			} else if (content[0].equals(BDC.AUTOMATIC_BID)) {
+				AuctionPenny a = (AuctionPenny) ownActiveAuctions.get(content[1]);
+				if (a != null) {
+					AutomaticBid ab = new AutomaticBid(Integer.valueOf(content[2]).intValue(), new BigDecimal(content[3]));
+					a.addAutomaticBid(msg.getSender().getLocalName(), ab);
+				}
+			}
 		}
 		private void parseInformMessage(ACLMessage msg) {
 			String content [] = msg.getContent().split(BDC.SEPARATOR);

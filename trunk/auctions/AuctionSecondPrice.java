@@ -31,7 +31,6 @@ public class AuctionSecondPrice extends Auction {
 		}
 	}
 
-	@Override
 	protected void setNewPrice(BigDecimal price) {
 		if ( getBestBid() != null) {
 			if (getBestBid().compareTo(price) < 0) {
@@ -59,8 +58,7 @@ public class AuctionSecondPrice extends Auction {
 		else if (this.price.compareTo(bid) <= 0) {
 			setNewPrice(bid);
 			if (isBestBid(bid)){
-				setBestBid(bid);
-				setBestBidder(bidder);
+				setBestBid(bid, bidder);
 				return true;
 			} else
 				return false;
