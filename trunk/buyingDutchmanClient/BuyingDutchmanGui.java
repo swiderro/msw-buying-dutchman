@@ -70,6 +70,7 @@ public class BuyingDutchmanGui extends JFrame {
 					jTFAuctionNr.setText(null);
 					jTAAuctionDescription.setText(null);
 				}
+				myAgent.getBdadtm().fireTableDataChanged();
 			}
 		}
 
@@ -140,10 +141,10 @@ public class BuyingDutchmanGui extends JFrame {
 
 		@Override
 		public void actionPerformed(ActionEvent ev) {
-			int ticks = countTicks();
+			int auctionTimieInMiliSeconds = countTicks();
 			float priceRange = calculatePriceRange();
 			String title = jTFAuctionTitle.getText().trim();
-			if (ticks > 0 && priceRange > 0 && title != null && !title.equalsIgnoreCase("")) {
+			if (auctionTimieInMiliSeconds > 0 && priceRange > 0 && title != null && !title.equalsIgnoreCase("")) {
 				GuiEvent e = new GuiEvent(jBAuction, BDC.GUIAUCTION);
 				AuctionItem ai = new AuctionItem(
 					jTAAuctionDescriptionInfo.getText().trim()
@@ -155,7 +156,7 @@ public class BuyingDutchmanGui extends JFrame {
 					, jTFStartPriceDec.getText().trim()
 					, jTFEndPriceInt.getText().trim()
 					, jTFEndPriceDec.getText().trim()
-					, ticks
+					, auctionTimieInMiliSeconds
 					, title
 					, (BDC.AuctionTypes) jCBAutionType.getSelectedItem()
 				);
@@ -486,12 +487,12 @@ public class BuyingDutchmanGui extends JFrame {
 	 */
 	public JTable getJTAuctions() {
 		if (jTAuctions == null) {
-			jTAuctions = new JTable(myAgent.getBdtm());
+			jTAuctions = new JTable(myAgent.getBdatm());
 			for (int i = 0; i < BDC.AUCTIONSCOLUMNNAMES.length; i++) {
 				jTAuctions.getColumnModel().getColumn(i).setHeaderValue(BDC.AUCTIONSCOLUMNNAMES[i]);
 				jTAuctions.getColumnModel().getColumn(i).setPreferredWidth(BDC.AUCTIONSCOLUMNWIDTH[i]);
 			}
-			jTAuctions.getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+			jTAuctions.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 			jTAuctions.setColumnSelectionAllowed(false);
 			jTAuctions.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);						
 			jTAuctions.getSelectionModel().addListSelectionListener(new ShownAuctionsListListener());
@@ -1018,7 +1019,7 @@ public class BuyingDutchmanGui extends JFrame {
 	 */    
 	public JTable getJTFinishedAuctions() {
 		if (jTFinishedAuctions == null) {
-			jTFinishedAuctions = new JTable(myAgent.getBdftm());
+			jTFinishedAuctions = new JTable(myAgent.getBdaftm());
 			for (int i = 0; i < BDC.FINISHEDAUCTIONSCOLUMNNAMES.length; i++) {
 				jTFinishedAuctions.getColumnModel().getColumn(i).setHeaderValue(BDC.FINISHEDAUCTIONSCOLUMNNAMES[i]);
 				jTFinishedAuctions.getColumnModel().getColumn(i).setPreferredWidth(BDC.FINISHEDAUCTIONSCOLUMNWIDTH[i]);
@@ -1144,7 +1145,14 @@ public class BuyingDutchmanGui extends JFrame {
 	 */
 	private JTable getJTAuctionBidHistory() {
 		if (jTAuctionBidHistory == null) {
-			jTAuctionBidHistory = new JTable();
+			jTAuctionBidHistory = new JTable(myAgent.getBdadtm());
+			for (int i = 0; i < BDC.AUCTIONBIDSCOLUMNNAMES.length; i++) {
+				jTAuctionBidHistory.getColumnModel().getColumn(i).setHeaderValue(BDC.AUCTIONBIDSCOLUMNNAMES[i]);
+				jTAuctionBidHistory.getColumnModel().getColumn(i).setPreferredWidth(BDC.AUCTIONBIDSCOLUMNWIDTH[i]);
+			}
+			jTAuctionBidHistory.getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+			jTAuctionBidHistory.setColumnSelectionAllowed(false);
+			jTAuctionBidHistory.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
 		}
 		return jTAuctionBidHistory;
 	}

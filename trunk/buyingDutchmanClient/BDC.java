@@ -2,37 +2,56 @@ package buyingDutchmanClient;
 
 import java.math.BigDecimal;
 import java.util.HashMap;
-
+/** 
+ * Klasa zawieraj¹ca wartoœci sta³e, u¿ywane w systemie. Wartoœci u¿ywane g³ównie w klasach {@link BuyingDutchmanGui} i {@link BuyingDutchmanAgent}
+ */
 public final class BDC {
+	/** Typ wyliczeniowy reprezentuj¹cy rodzaje aukcji obs³ugiwane przez system.*/
 	public enum AuctionTypes {
 		HOLENDERSKA, ANGIELSKA, DRUGIEJ_CENY, PRZETARG, GROSZOWA
 	}
 	//BuyingDutchman Consts
+	/** Nazwy kolumn dla tabeli trwaj¹cych aukcji */
 	public static final String[] AUCTIONSCOLUMNNAMES = {
 		"# aukcji", "Typ", "Wystawca", "Kategoria", "Podkategoria", "Pozo. czas", "Cena", "Max oferta", "Oferent", "Tytu³"		
 	};
-	public static final String[] FINISHEDAUCTIONSCOLUMNNAMES = {
-		"# aukcji", "Typ", "Wystawca", "Kategoria", "Podkategoria", "Pozo. czas", "Cena", "Max oferta", "Oferent", "Tytu³"		
-	};
+	/** Szerokoœci kolumn dla tabeli trwaj¹cych aukcji */
 	public static final int[] AUCTIONSCOLUMNWIDTH = {
 		50, 80, 60, 60, 60, 60, 40, 60, 70, 210
 	};
+	/** Nazwy kolumn dla tabeli zakoñczonych aukcji */
+	public static final String[] FINISHEDAUCTIONSCOLUMNNAMES = {
+		"# aukcji", "Typ", "Wystawca", "Kategoria", "Podkategoria", "Pozo. czas", "Cena", "Max oferta", "Oferent", "Tytu³"		
+	};
+	/** Szerokoœci kolumn dla tabeli zakoñczonych aukcji */
 	public static final int[] FINISHEDAUCTIONSCOLUMNWIDTH = {
 		50, 80, 60, 60, 60, 60, 40, 60, 70, 210
 	};
+	/** Nazwy kolumn dla tabeli historii ofert */
+	public static final String [] AUCTIONBIDSCOLUMNNAMES = {
+		"Oferent", "Cena"
+	};
+	/** Szerokoœci kolumn dla tabeli historii ofert */
+	public static final int[] AUCTIONBIDSCOLUMNWIDTH = {
+		50, 50
+	};
+	/** Nazwa ontologii u¿ywanej w wysy³anych wiadomoœciach */
 	public static final String BDONTO = "bd-ontology";
 	public static final String SDTYPELISTENER = "bd-agent";
 	public static final String SDNAMELISTENER = "Dutch Auction Agent";	
 	public static final String SDTYPEAUCTION = "bd-auction";
 	public static final String SDNAMEAUCTION = "Agent Dutch Auctions";
 	public static final String SDPNAME = "Dutch Auction";
-	public static final int TICK = 1000;
+	/** D³ugoœæ okresu zegara wyra¿ona w milisekundach */
+	public static final int TICK = 10000;
 	public static final int GUIAUCTION = 0;
 	public static final int GUIBUYNOW = 1;
 	public static final int GUIWAITBUY = 2;
 	public static final int GUICLOSE = 3;
 	public static final int GUIPROPOSITION = 4;
-	public static final float TICKSPERSECOND = 1000/TICK;
+	//public static final float TICKSPERSECOND = 1000/TICK;
+	/** Iloœæ okresów zegara na sekundê. Wykorzystywane w {@link BuyingDutchmanGui#countTicks}*/
+	public static final double TICKSPERSECOND = 1000.0/TICK;
 	public static final String PROTOCOLS = "fipa-request fipa-Contract-Net fipa-subscribe fipa-agree fipa-proposal fipa-cfp fipa-accept-proposal";
 	public static final String POSTFIX = ":";
 	public static final String SEPARATOR = ";";
