@@ -41,6 +41,7 @@ public abstract class Auction implements Serializable {
 		setEndPrice(computeEndPrice());
 		int time = ((AD.getStartTicks())/BDC.TICK);		
 		setReductionStep(getPrice().subtract(getEndPrice()).divide(new BigDecimal(time), BDC.BigDecimalScale, BDC.BigDecimalRounding));
+		bidsHistory = new ArrayList();
 	}
 	private void setPrice(BigDecimal computePrice) {
 		this.price = computePrice;
@@ -143,7 +144,10 @@ public abstract class Auction implements Serializable {
 		return auctioneer+BDC.POSTFIX+an;
 	}
 	public final String getBestBidString() {
-		if (bestBid != null && isFinished())
+		//TODO 0 wczeœniej ta zmienna s³u¿y³a do obs³ugi najwy¿szego oferenta w automatycznych wywo³aniach aukcji
+		// teraz s¹ automaticBid'y, wiêc ta zmienna bêdzie teraz obs³ugiwaæ oferenta aktualnej najlepszej oferty
+		//if (bestBid != null && isFinished())
+		if (bestBid != null)
 			return bestBid.toString();		
 		else
 			return BDC.NONESTRING;
@@ -233,7 +237,7 @@ public abstract class Auction implements Serializable {
 		bidsHistory.add(new Bid(bidder, bid));
 	}
 	private void setNewPrice(BigDecimal bid) {
-		//TODO test Po³¹czyæ z setBestBidder. Brawo, bo bêdzie mnóstwo testowania
+		//TODO TEST Po³¹czyæ z setBestBidder. Brawo, bo bêdzie mnóstwo testowania
 		this.price = bid;
 		String [] p = this.price.toPlainString().split(BDC.REGEXFPOINT);
 		if (p[1].length() >= 2) {
@@ -270,5 +274,8 @@ public abstract class Auction implements Serializable {
 		+ BDC.SEPARATOR + getTicksLeft()
 		+ BDC.SEPARATOR + getBestBidString()
 		+ BDC.SEPARATOR + getBestBidder();
+	}
+	public ArrayList getBidsHistory() {
+		return bidsHistory;
 	}
 }

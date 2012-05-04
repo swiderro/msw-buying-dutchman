@@ -14,12 +14,12 @@ public class AuctionDetails implements Serializable{
 	private String PriceInt;
 	private String PriceDec;
 	private final String Title;
-	private int TicksLeft;
-	private final int StartTicks;
+	private int MiliSecondsLeft;
+	private final int StartMiliSeconds;
 	private AuctionTypes Type;
 	
 	public AuctionDetails(String startPriceInt, String startPriceDec, String endPriceInt,
-			String endPriceDec, int ticks, String title, BDC.AuctionTypes type) {
+			String endPriceDec, int auctionTimieInMiliSeconds, String title, BDC.AuctionTypes type) {
 		String i = endPriceDec;
 		if (i == null || i.equalsIgnoreCase("") || i.equalsIgnoreCase("0") || i.equalsIgnoreCase("00"))
 			i = "00";
@@ -75,8 +75,8 @@ public class AuctionDetails implements Serializable{
 		PriceInt = StartPriceInt;
 		PriceDec = StartPriceDec;
 		Title = title;
-		StartTicks = ticks;
-		TicksLeft = ticks;
+		StartMiliSeconds = auctionTimieInMiliSeconds;
+		MiliSecondsLeft = auctionTimieInMiliSeconds;
 		Type = type;
 	}
 	public String getStartPriceInt() {
@@ -107,13 +107,13 @@ public class AuctionDetails implements Serializable{
 		return Title;
 	}
 	public int getTicksLeft() {
-		return TicksLeft;
+		return MiliSecondsLeft;
 	}
 	public void setTicksLeft(int ticksLeft) {
-		TicksLeft = ticksLeft;
+		MiliSecondsLeft = ticksLeft;
 	}
 	public int getStartTicks() {
-		return StartTicks;
+		return StartMiliSeconds;
 	}
 	public AuctionTypes getType() {
 		return Type;

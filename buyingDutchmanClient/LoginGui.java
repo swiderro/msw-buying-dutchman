@@ -14,15 +14,28 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
+/**
+ * Klasa odpowiedzialna za GUI logowania do systemu.
+ * Tworzy okno logowania, w którym u¿ytkownik wprowadza nazwê agenta do utworzenia oraz adres hosta.
+ * Adres hosta identyfikuje platformê agentow¹, do której agent ma za zadanie po³¹czyæ siê.
+ * 
+ * Dziedziczy po javax.swing.JFrame, korzysta z bibliotek Swing i AWT.
+ */
 public class LoginGui extends JFrame{
 
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 4882352228364389156L;
+	private static final long serialVersionUID = 1L;
 	//FRAME CONSTS
+	/**
+	 * Szerokoœæ okna logowania.
+	 */
 	private static final int FRAMEWIDTH = 310;
+	/**
+	 * Wysokoœæ okna logowania.
+	 */
 	private static final int FRAMEHEIGHT = 114;
+	/**
+	 * Tytu³ okna logowania.
+	 */
 	private static final String FRAMETITLE = "Buying Dutchman Login";  
 	
 	//ELEMENTS
@@ -31,8 +44,10 @@ public class LoginGui extends JFrame{
 	private JPanel jPAccountDetails = null;
 	private JPanel jPLogin = null;
 	private JLabel jLLogin = null;
+	/** Nazwa agenta, który ma zostaæ utworzony. */
 	private JTextField jTFLogin = null;
 	private JLabel jLHost = null;
+	/** Nazwa hosta, na której jest uruchomiona platforma agentowa. */
 	private JTextField jTFHost = null;
 	private JButton jBLogin = null;
 	//ELEMENTS CONSTS
@@ -43,14 +58,19 @@ public class LoginGui extends JFrame{
 	private static final String LOGINBUTTON = "Zaloguj";  
 	private static final String LOGINTEXTFIELDINFO = "Login info";  
 	//AGENT CONSTS
+	/**
+	 * Nazwa klasy agenta. U¿ywana w celu utworzenia agenta.
+	 */
 	private static final String AGENTNAME = "BuyingDutchmanAgent";
-	private static final String SEPARATOR_1 = ":";	
+	private static final String SEPARATOR_1 = ":";
+	/**
+	 * Nazwa pakietu, zawieraj¹cego klasê agenta. U¿ywana w celu utworzenia agenta.
+	 */
 	private static final String PACKAGENAME = "buyingDutchmanClient";
 	private static final String SEPARATOR_2 = ".";
 	 	
 	/**
-	 * Default constructor 
-	 * 
+	 * Konstruktor domyœlny. Wywo³uje super-konstruktor, nastêpnie wywo³uje metodê {@link #initialize()}.
 	 */
 	public LoginGui() {
 		super();
@@ -58,8 +78,7 @@ public class LoginGui extends JFrame{
 	}
 	
 	/**
-	 * This method initializes this
-	 * 
+	 * Metoda inicializuj¹ca okno logowania. 
 	 */
 	private void initialize() {
         this.setSize(new Dimension(FRAMEWIDTH, FRAMEHEIGHT));
@@ -70,11 +89,6 @@ public class LoginGui extends JFrame{
   	  	this.setVisible(true);
 	}
 	
-	/**
-	 * This method initializes jContentPane	
-	 * 	
-	 * @return javax.swing.JPanel	
-	 */
 	private JPanel getJContentPane() {
 		if (jContentPane == null) {
 			jContentPane = new JPanel();
@@ -83,12 +97,6 @@ public class LoginGui extends JFrame{
 		}
 		return jContentPane;
 	}
-	
-	/**
-	 * This method initializes jPAccount	
-	 * 	
-	 * @return javax.swing.JPanel	
-	 */
 	
 	private JPanel getJPAccount() {
 		if (jPAccount == null) {
@@ -100,11 +108,6 @@ public class LoginGui extends JFrame{
 		return jPAccount;
 	}
 	
-	/**
-	 * This method initializes jPAccountDetails	
-	 * 	
-	 * @return javax.swing.JPanel	
-	 */
 	private JPanel getJPAccountDetails() {
 		if (jPAccountDetails == null) {
 			FlowLayout flowLayout1 = new FlowLayout();
@@ -119,11 +122,6 @@ public class LoginGui extends JFrame{
 		return jPAccountDetails;
 	}
 	
-	/**
-	 * This method initializes jPLogin	
-	 * 	
-	 * @return javax.swing.JPanel	
-	 */
 	private JPanel getJPLogin() {
 		if (jPLogin == null) {
 			FlowLayout flowLayout = new FlowLayout();
@@ -139,11 +137,6 @@ public class LoginGui extends JFrame{
 		return jPLogin;
 	}
 	
-	/**
-	 * This method initializes jTFLogin	
-	 * 	
-	 * @return javax.swing.JTextField	
-	 */
 	private JTextField getJTFLogin() {
 		if (jTFLogin == null) {
 			jTFLogin = new JTextField(LOGINCOLUMNSNUMBER);
@@ -172,11 +165,6 @@ public class LoginGui extends JFrame{
 		return jTFLogin;
 	}
 
-	/**
-	 * This method initializes jTFLoginInfo	
-	 * 	
-	 * @return javax.swing.JTextField	
-	 */
 	private JTextField getJTFHost() {
 		if (jTFHost == null) {
 			jTFHost = new JTextField(LOGINCOLUMNSNUMBER);
@@ -187,11 +175,6 @@ public class LoginGui extends JFrame{
 		return jTFHost;
 	}
 
-	/**
-	 * This method initializes jBLogin	
-	 * 	
-	 * @return javax.swing.JButton	
-	 */
 	private JButton getJBLogin() {
 		if (jBLogin == null) {
 			jBLogin = new JButton(LOGINBUTTON);
@@ -204,6 +187,12 @@ public class LoginGui extends JFrame{
 		return jBLogin;
 	}	
 
+	/**
+	 * Metoda tworz¹ca argumenty odpowiednie do u¿ycia w jade.Boot.main(String [] args) w celu utworzenia agenta systemu.
+	 * 
+	 * @return			Tabela argumentów w formie, w jakiej potrafi je przyj¹æ metoda jade.Boot.main(String [] args)
+	 * @see				#connect()
+	 */
 	private String[] getBootArguments() {
 		String AgentFQN = getAgentFQN();
 		String [] a = new String[] {
@@ -215,6 +204,10 @@ public class LoginGui extends JFrame{
 		return a;
 	}
 
+	/**
+	 * Metoda s³u¿y do utworzenia i po³¹czenia agenta z platform¹ agentow¹. U¿ywa w tym celu jade.Boot.main(String [] args).
+	 * Do jade.Boot.main s¹ przekazywane argumenty przygotowane za pomoc¹ metody {@link #getBootArguments()}
+	 */
 	protected void connect() {
 		try {			
 			String login = jTFLogin.getText().trim();
@@ -231,7 +224,14 @@ public class LoginGui extends JFrame{
 			e.printStackTrace(); 
 		}
 	}
-	
+	/**
+	 * Zwraca ci¹g reprezentuj¹cy klasê agenta. Wykorzystywany jako parametr wywo³ania jade.Boot.main(String [] args)
+	 * 
+	 * @return Ci¹g reprezentuj¹cy klasê agenta.
+	 * @see #getBootArguments()
+	 * @see #PACKAGENAME
+	 * @see #AGENTNAME
+	 */
 	private String getAgentFQN() {
 		return jTFLogin.getText().trim()+SEPARATOR_1+PACKAGENAME+SEPARATOR_2+AGENTNAME;
 	}

@@ -10,6 +10,7 @@ import javax.swing.table.AbstractTableModel;
 import auctions.Auction;
 import auctions.AuctionPenny;
 import auctions.AutomaticBid;
+import auctions.Bid;
 import automaticBuyers.AutomaticBuyer;
 import automaticBuyers.AutomaticBuyerFactory;
 
@@ -28,43 +29,61 @@ import jade.lang.acl.ACLMessage;
 import jade.lang.acl.UnreadableException;
 
 /**
- * @author Marcin Lucjan Swiderski FEIT WUT
- */
+ * Klasa implementuj¹ca i umiejscawiaj¹ca agenta w œrodowisku platformy agentowej.
+ * Jej odpowiedzialnoœci¹ s¹:
+ * <ol>
+ * <li>Stworzenie agenta dzia³aj¹cego na platformie agentowej</li>
+ * <li>który bêdzie móg³ komunikowaæ siê us³ugami platformy</li>
+ * <li>oraz z innymi agentami systemu Buying Dutchman</li>
+ * <li>Zapewnienie prawid³owego prowadzenia aukcji</li>
+ * <li>Zapewnienie prawid³owego uczestnictwa w aukcji</li>
+ * <li>przechowywanie danych o aukcjach zakoñczonych, prowadzonych i wygranych</li>
+ * </ol>*/
 public class BuyingDutchmanAgent extends GuiAgent {	
 
 	/** Default serialization constant */
 	private static final long serialVersionUID = 1L;
-	/** Agent name, not fully qualified */
+	/** Skrócona nazwa agenta (nie w pe³ni kwalifikowana) */
 	private String nickName;
-	/** Agent's GUI */
+	/** GUI agenta */
 	private BuyingDutchmanGui myGui;
-	/** Next auction ID */
+	/** Id kolejnej aukcji */
 	private int nextAuctionNumber;
-	/** Active auctions auctioned by this agent */
+	/** Aukcje prowadzone przez agenta */
 	private Hashtable ownActiveAuctions;
-	/** Auctions auctioned by this agent that has just finished */
+	/** Œwie¿o zakoñczone aukcje (zmienna pomocnicza) */
 	private Hashtable ownFreshlyFinishedAuctions;
-	/** Active auctions displayed by the agent */
+	/** Trwaj¹ce aukcje wyœwietlane przez agenta */
 	private Hashtable shownAuctions;
-	/** Row numbers of active auctions displayed by the agent */
+	/** Wektor okreœlaj¹cy kolejnoœæ wyœwietlania trwaj¹cych aukcji */
 	private Vector shownAuctionsRowNumber;
-	/** A flag used for refreshing displayed active auctions table*/
+	/** Flaga u¿ywana w celu odœwie¿ania tabeli trwaj¹cych aukcji */
 	private boolean refreshAuctionsTable;
-	/** Table model for active auctions display */
-	private AbstractTableModel bdtm;
-	/** Used for keeping selection after active auctions table has resized */
+	/** Obiekt TableModel dla tabeli trwaj¹cych aukcji */
+	private AbstractTableModel bdatm;
+	/** Zmienna pomocnicza, s³u¿¹ca do przechowania zaznaczonej aukcji */
 	private String selection;
-	/** Row numbers of finished auctions displayed by the agent */
+	/** Wektor okreœlaj¹cy kolejnoœæ wyœwietlania zakoñczonych aukcji */
 	private Vector finishedAuctionsRowNumber;
-	/** Finished auctions displayed by the agent */
+	/** Zakoñczone aukcje wyœwietlane przez agenta */
 	private Hashtable finishedAuctions;
-	/** Table model for finished auction display */
-	private AbstractTableModel bdftm;
-	/** A flag used for refreshing displayed finished auctions table*/
+	/** Obiekt TableModel dla tabeli zakoñczonych aukcji */
+	private AbstractTableModel bdaftm;	
+	/** Obiekt TableModel dla tabeli historii ofert */
+	private AbstractTableModel bdadtm;
+	/** Flaga u¿ywana w celu odœwie¿ania tabeli zakoñczonych aukcji*/
 	private boolean refreshFinishedAuctionTable;
-	/** Auctions the agent is going to bid*/
+	/** Zbiór obiektów AutomaticBid, które agent bêdzie uruchamia³ */
 	private Hashtable automaticBuyers;
-	
+	/** Metoda inicjalizuj¹ca obiekt Agenta.
+	 * <ol>
+	 * <li>inicjuje zmienne obiektu</li>
+	 * <li>rejestruje agenta na platformie agentowej</li>
+	 * <li>inicjuje GUI agenta</li>
+	 * <li>dodaje zachowanie zegara</li>
+	 * <li>dodaje zachowanie odbierania wiadomoœci</li>
+	 * </ol>
+	 */
 	protected void setup() {
 		//Field initialization
 		nickName=getAID().getLocalName();
@@ -78,8 +97,9 @@ public class BuyingDutchmanAgent extends GuiAgent {
 		nextAuctionNumber = 0;
 		refreshAuctionsTable = false;
 		refreshFinishedAuctionTable = false;
-		bdtm = new BDTableModel();
-		bdftm = new BDFinishedTableModel();
+		bdatm = new BDAuctionsTableModel();
+		bdaftm = new BDAuctionsFinishedTableModel();
+		bdadtm = new BDAuctionBidsTableModel();
 		selection = null;
 		//Agent registration
 		try {
@@ -103,6 +123,7 @@ public class BuyingDutchmanAgent extends GuiAgent {
 		} catch (FIPAException e) {
 			e.printStackTrace();
 			doDelete();
+			return;
 		}
 		//GUI initialization
 		myGui = new BuyingDutchmanGui(this);
@@ -112,7 +133,13 @@ public class BuyingDutchmanAgent extends GuiAgent {
 	    //Messaging service behaviour
 	    addBehaviour(new MessageReciever());
 	}
-
+	/**
+	 * Metoda s³u¿¹ca do poprawnego usuwania agenta.
+	 * <ol>
+	 * <li>usuwa GUI agenta</li>
+	 * <li>wyrejestrowuje agenta z platformy agentowej</li>
+	 * </ol>
+	 */
 	public void doDelete(){
 		//GUI disposal
 		myGui.setVisible(false);
@@ -125,7 +152,11 @@ public class BuyingDutchmanAgent extends GuiAgent {
 		}
 		super.doDelete();
 	}
-	
+	/**
+	 * Metoda obs³uguj¹ca zda¿enia GUI. Uruchamia odpowiednie metody, w zale¿noœci od typu zdarzenia ev.getType()
+	 * @param ev obiekt typu GuiEvent, przekazanay ze zdarzenia.
+	 * @see BuyingDutchmanGui
+	 */
 	public void onGuiEvent(GuiEvent ev) {
 		if (ev.getType() == BDC.GUIAUCTION) {
 			auction((Auction)ev.getParameter(BDC.AUCTIONPARAMNUM));			
@@ -155,7 +186,12 @@ public class BuyingDutchmanAgent extends GuiAgent {
 			doDelete();
 		}
 	}	
-
+	/**
+	 * Metoda obs³uguje funkcjonalnoœæ automatycznego licytowania. Dodaje obiekt typu AutomaticBuyer do zbioru automaticBuyers agenta lokalnego.
+	 * Metoda uruchamiana po stronie agenta lokalnego.
+	 * @param auctionNr numer aukcji, która zostanie automatycznie licytowana.
+	 * @param auctioneer
+	 */
 	private void waitAndBuy(String auctionNr, String auctioneer, BigDecimal bid, BigDecimal upBid) {
 		if (fraudBid(auctioneer))
 			return;
@@ -529,6 +565,7 @@ public class BuyingDutchmanAgent extends GuiAgent {
 					selection = (String) shownAuctionsRowNumber.get(i);
 				for (int j = 1; j < content.length; j+=1) {
 					Auction a = (Auction) shownAuctions.remove(sender + BDC.POSTFIX + content[j]);
+					shownAuctionsRowNumber.remove(a.getAuctioneerAN());
 					automaticBuyers.remove(sender + BDC.POSTFIX + content[j]);
 					if ( a!=null ) {
 						if (
@@ -539,7 +576,6 @@ public class BuyingDutchmanAgent extends GuiAgent {
 							finishedAuctionsRowNumber.add(a.getAuctioneerAN());
 							setRefreshFinishedAuctionsTable(true);
 						}
-						shownAuctionsRowNumber.remove(a.getAuctioneerAN());
 					}				
 				}
 				setRefreshAuctionsTable(true);				
@@ -594,8 +630,44 @@ public class BuyingDutchmanAgent extends GuiAgent {
     	}
     }
 
+	// TableModel for JTAuctionBids
+	private class BDAuctionBidsTableModel extends AbstractTableModel {
+		private static final long serialVersionUID = 1L;
+		@Override
+		public int getColumnCount() {
+			return BDC.AUCTIONBIDSCOLUMNNAMES.length;
+		}
+
+		@Override
+		public int getRowCount() {
+			int row = myGui.getJTAuctions().getSelectedRow();
+			if (row<0)
+				return 0;
+			else
+				return ((Auction) shownAuctions.get(shownAuctionsRowNumber.get(row))).getBidsHistory().size();
+		}
+
+		@Override
+		public Object getValueAt(int row, int col) {
+			//TODO 1 NIE POKAZUJE HISTORII, W OGÓLE NIE WYWO£UJE TEJ FUNKCJI, PEWNIE NIE JEST PODPIÊTE.
+			//TRZEBA USTAWIÆ fireTableDataChanged PO ZAZNACZENIU INNEGO WIERSZA NA LIŒCIE LUB PO NOWYM BIDZIE NA ZAZNACZONEJ AUKCJI
+			//CZYLI TRZEBA PODPI¥Æ POD METODÊ A LA bdatm.onSelectChange() I POD parseCallForProposal(), najlepiej tylko na zazanaczonej aukcji
+			int r = myGui.getJTAuctions().getSelectedRow();
+			if (r < 0)
+				return null;
+			Auction a = ((Auction) shownAuctions.get(shownAuctionsRowNumber.get(r)));
+			if (a != null && row < a.getBidsHistory().size()) {
+				return ((Bid) a.getBidsHistory().get(row)).getColumnValue(col);			
+			}
+			return null;
+		}
+		
+	}
+	
 	// TableModel for JTAuctions
-	private class BDTableModel extends AbstractTableModel {
+	private class BDAuctionsTableModel extends AbstractTableModel {		
+		
+		
 		private static final long serialVersionUID = 1L;
 
 		@Override
@@ -625,7 +697,7 @@ public class BuyingDutchmanAgent extends GuiAgent {
 	}
 	
 	// TableModel for JTFinishedAuctions
-	private class BDFinishedTableModel extends AbstractTableModel {
+	private class BDAuctionsFinishedTableModel extends AbstractTableModel {
 
 		private static final long serialVersionUID = 1L;
 
@@ -722,15 +794,16 @@ public class BuyingDutchmanAgent extends GuiAgent {
 			String AuctionId = null;
 			if (row >= 0 && row < shownAuctionsRowNumber.size())
 				AuctionId = (String) shownAuctionsRowNumber.get(row);
-			bdtm.fireTableDataChanged();
+			getBdatm().fireTableDataChanged();
 			if (selection != null) {
 				row = shownAuctionsRowNumber.lastIndexOf(selection);
 				selection = null;
 			}
 			else if (AuctionId != null)
 				row = shownAuctionsRowNumber.lastIndexOf(AuctionId);
-			if (row >= 0 && row < bdtm.getRowCount())
+			if (row >= 0 && row < bdatm.getRowCount())
 				myGui.getJTAuctions().setRowSelectionInterval(row, row);
+			getBdadtm().fireTableDataChanged();
 		}		
 		setRefreshAuctionsTable(false);
 	}
@@ -741,10 +814,10 @@ public class BuyingDutchmanAgent extends GuiAgent {
 			String AuctionId = null;
 			if (row >= 0 && row < finishedAuctionsRowNumber.size())
 				AuctionId = (String) finishedAuctionsRowNumber.get(row);
-			bdftm.fireTableDataChanged();
+			bdaftm.fireTableDataChanged();
 			if (AuctionId != null)
 				row = finishedAuctionsRowNumber.lastIndexOf(AuctionId);
-			if (row >= 0 && row < bdtm.getRowCount())
+			if (row >= 0 && row < bdatm.getRowCount())
 				myGui.getJTFinishedAuctions().setRowSelectionInterval(row, row);
 		}		
 		setRefreshFinishedAuctionsTable(false);
@@ -762,16 +835,22 @@ public class BuyingDutchmanAgent extends GuiAgent {
 			;
 	}
 
-	public AbstractTableModel getBdtm() {
-		if (bdtm == null)
-			bdtm = new BDTableModel();
-		return bdtm;
+	public AbstractTableModel getBdatm() {
+		if (bdatm == null)
+			bdatm = new BDAuctionsTableModel();
+		return bdatm;
 	}
 
-	public AbstractTableModel getBdftm() {
-		if (bdftm == null)
-			bdftm = new BDFinishedTableModel();
-		return bdftm;
+	public AbstractTableModel getBdaftm() {
+		if (bdaftm == null)
+			bdaftm = new BDAuctionsFinishedTableModel();
+		return bdaftm;
+	}
+
+	public AbstractTableModel getBdadtm() {
+		if (bdadtm == null)
+			bdadtm = new BDAuctionBidsTableModel();
+		return bdadtm;
 	}
 	
 	public Auction getShownAuction(int row) {
