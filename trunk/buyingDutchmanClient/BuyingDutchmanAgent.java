@@ -2,6 +2,7 @@ package buyingDutchmanClient;
 
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Vector;
 import java.util.Hashtable;
@@ -190,7 +191,9 @@ public class BuyingDutchmanAgent extends GuiAgent {
 	 * Metoda obs³uguje funkcjonalnoœæ automatycznego licytowania. Dodaje obiekt typu AutomaticBuyer do zbioru automaticBuyers agenta lokalnego.
 	 * Metoda uruchamiana po stronie agenta lokalnego.
 	 * @param auctionNr numer aukcji, która zostanie automatycznie licytowana.
-	 * @param auctioneer
+	 * @param auctioneer agent, bêd¹cy sprzedawc¹ na danej aukcji.
+	 * @param bid kwota graniczna, od/do której agent ma licytowaæ.
+	 * @param upBid kwota, o któr¹ agent bêdzie podbija³ cenê aukcji.
 	 */
 	private void waitAndBuy(String auctionNr, String auctioneer, BigDecimal bid, BigDecimal upBid) {
 		if (fraudBid(auctioneer))
@@ -514,7 +517,7 @@ public class BuyingDutchmanAgent extends GuiAgent {
 						aa.onTick(
 							content[j++]
 							, content[j++]
-							, new Integer(content[j++]).intValue()
+							, new Double(content[j++]).doubleValue()
 							, content[j++]
 							, content[j++]          
 						);
@@ -643,8 +646,14 @@ public class BuyingDutchmanAgent extends GuiAgent {
 			int row = myGui.getJTAuctions().getSelectedRow();
 			if (row<0)
 				return 0;
-			else
-				return ((Auction) shownAuctions.get(shownAuctionsRowNumber.get(row))).getBidsHistory().size();
+			else {
+				Auction a1 = ((Auction) shownAuctions.get(shownAuctionsRowNumber.get(row)));
+				ArrayList a = a1.getBidsHistory();
+				if (a != null)
+					return a.size();
+				else
+					return 0;
+			}
 		}
 
 		@Override
@@ -829,7 +838,7 @@ public class BuyingDutchmanAgent extends GuiAgent {
 			+ BDC.SEPARATOR + a.getAN() 
 			+ BDC.SEPARATOR + a.getPriceInt() 
 			+ BDC.SEPARATOR + a.getPriceDec() 
-			+ BDC.SEPARATOR + a.getTicksLeft()
+			+ BDC.SEPARATOR + a.getMiliSecondsLeft()
 			+ BDC.SEPARATOR + a.getBestBidString()
 			+ BDC.SEPARATOR + a.getBestBidder()
 			;

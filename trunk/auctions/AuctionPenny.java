@@ -22,7 +22,7 @@ public class AuctionPenny extends Auction {
 
 	@Override
 	protected void performAuctionTick() {
-		if (getAd().getTicksLeft() <= 0) {
+		if (getAd().getMiliSecondsLeft() <= 0) {
 			HashMap<String, AutomaticBid> removedAutomaticBids = new HashMap<String, AutomaticBid>();
 			boolean priceChanged = false;
 			if ( !automaticBids.isEmpty()) {
@@ -34,7 +34,7 @@ public class AuctionPenny extends Auction {
 							// Increases auction price by currency rate corresponding to number of automatic bidders that still can provide
 							setNewPrice(getPrice().add(BigDecimal.valueOf(BDC.Grosz)));
 							// Prolongs auction time by number of thicks equal to number of automatic bidders that still can provide
-							setTicksLeft(getTicksLeft()+1);
+							setMiliSecondsLeft(getMiliSecondsLeft()+1);
 							setBestBidder(ab);
 							setBestBid(getPrice());
 						} else {
@@ -92,8 +92,8 @@ public class AuctionPenny extends Auction {
 								getPrice().add(BigDecimal.valueOf(BDC.Grosz))
 								, bidder
 							);
-							// Prolongs auction time by number of thicks equal to number of automatic bidders that still can provide
-							setTicksLeft(getTicksLeft()+BDC.TICK);
+							// Prolongs auction time by number of seconds equal to number of automatic bidders that still can provide
+							setMiliSecondsLeft(getMiliSecondsLeft()+BDC.MILISECOND);
 							setBestBid(getPrice(), bidder);
 						} else {
 							// Removing bidder, that can't provide

@@ -39,8 +39,8 @@ public abstract class Auction implements Serializable {
 		setBestBidder(null);
 		setPrice(computePrice());
 		setEndPrice(computeEndPrice());
-		int time = ((AD.getStartTicks())/BDC.TICK);		
-		setReductionStep(getPrice().subtract(getEndPrice()).divide(new BigDecimal(time), BDC.BigDecimalScale, BDC.BigDecimalRounding));
+		double ticks = ((AD.getStartMiliSeconds())/BDC.TICK);
+		setReductionStep(getPrice().subtract(getEndPrice()).divide(new BigDecimal(ticks), BDC.BigDecimalScale, BDC.BigDecimalRounding));
 		bidsHistory = new ArrayList();
 	}
 	private void setPrice(BigDecimal computePrice) {
@@ -73,11 +73,11 @@ public abstract class Auction implements Serializable {
 	public String getPriceDec() {
 		return getAd().getPriceDec();		
 	}
-	public int getTicksLeft() {
-		return getAd().getTicksLeft();
+	public double getMiliSecondsLeft() {
+		return getAd().getMiliSecondsLeft();
 	}
-	protected void setTicksLeft(int i) {
-		getAd().setTicksLeft(i);
+	protected void setMiliSecondsLeft(double d) {
+		getAd().setMiliSecondsLeft(d);
 	}
 	//Sprawdza warunek koñca, spowodowany z³o¿eniem oferty.
 	//Dla ka¿dego typu aukcji mo¿e byæ inny, wiêc jest zadeklarowany jako abstract
@@ -87,7 +87,7 @@ public abstract class Auction implements Serializable {
 	protected void performAuctionTick(){};
 	public void performFinish(){
 		setFinished(true);
-		setTicksLeft(0);
+		setMiliSecondsLeft(0);
 		String [] i = getPrice().toPlainString().split(BDC.REGEXFPOINT);
 		if (i[1].length() >= 2) {
 			getAd().setPriceDec(i[1].substring(0, 2));
@@ -101,8 +101,8 @@ public abstract class Auction implements Serializable {
 	public final void onTick() {
 		if (isFinished())
 			return;
-		setTicksLeft(getTicksLeft()-BDC.TICK);
-		if (getTicksLeft() >= 0) {
+		setMiliSecondsLeft(getMiliSecondsLeft()-BDC.TICK);
+		if (getMiliSecondsLeft() >= 0) {
 			performAuctionTick();
 			if(checkFinishByOffer())
 				performFinish();
@@ -111,13 +111,13 @@ public abstract class Auction implements Serializable {
 		}
 	}
 	//odpalane na aukcji po stronie agenta obserwuj¹cego
-	public void onTick(String priceInt, String priceDec, int ticksLeft, String bestBid, String bestBidder) {	
+	public void onTick(String priceInt, String priceDec, double miliSecondsLeft, String bestBid, String bestBidder) {	
 		if (isFinished())
 			return;
 		getAd().setPriceDec(priceDec);
 		getAd().setPriceInt(priceInt);
 		setPrice(new BigDecimal(priceInt+BDC.FPOINT+priceDec));
-		setTicksLeft(ticksLeft);
+		setMiliSecondsLeft(miliSecondsLeft);
 		if (!bestBid.equalsIgnoreCase(BDC.NONESTRING))
 			setBestBid(bestBid);
 		if (!bestBidder.equalsIgnoreCase(BDC.NONESTRING))
@@ -168,7 +168,7 @@ public abstract class Auction implements Serializable {
 		case 2: return getAuctioneer();
 		case 3: return getCategory();
 		case 4: return getSubCategory();
-		case 5: return getTicksLeft()/BDC.TICK;
+		case 5: return getMiliSecondsLeft()/BDC.MILISECOND;
 		case 6: return getPriceInt()+BDC.POINT+getPriceDec();
 		case 7: return getBestBidString();
 		case 8: return getBestBidder();
@@ -192,7 +192,7 @@ public abstract class Auction implements Serializable {
 		case 2: return getAuctioneer();
 		case 3: return getCategory();
 		case 4: return getSubCategory();
-		case 5: return getTicksLeft()/BDC.TICK;
+		case 5: return getMiliSecondsLeft()/BDC.MILISECOND;
 		case 6: return getPriceInt()+BDC.POINT+getPriceDec();
 		case 7: return getBestBidString();
 		case 8: return getBestBidder();
@@ -234,6 +234,10 @@ public abstract class Auction implements Serializable {
 		setBestBidder(bidder);
 		setNewPrice(bid);
 		//TODO 2 Zrobienie historii sk³adanych ofert.
+		//Dodaje bidy do aukcji lokalnej, ale nie dodaje do aukcji pokazywanych.
+		//Nale¿y zaimplementowaæ mechanizm rozsy³ania informacji o historii ofert.
+		//mo¿na dorzuciæ do ju¿ istniej¹cego nastêpuj¹ce parametry:
+		//iloœæ wpisów w historii;oferent;oferta(xN)
 		bidsHistory.add(new Bid(bidder, bid));
 	}
 	private void setNewPrice(BigDecimal bid) {
@@ -271,7 +275,7 @@ public abstract class Auction implements Serializable {
 		return getAN()
 		+ BDC.SEPARATOR + getPriceInt() 
 		+ BDC.SEPARATOR + getPriceDec() 
-		+ BDC.SEPARATOR + getTicksLeft()
+		+ BDC.SEPARATOR + getMiliSecondsLeft()
 		+ BDC.SEPARATOR + getBestBidString()
 		+ BDC.SEPARATOR + getBestBidder();
 	}
