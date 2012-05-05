@@ -14,7 +14,7 @@ public class AuctionDetails implements Serializable{
 	private String PriceInt;
 	private String PriceDec;
 	private final String Title;
-	private int MiliSecondsLeft;
+	private double MiliSecondsLeft;
 	private final int StartMiliSeconds;
 	private AuctionTypes Type;
 	
@@ -106,13 +106,13 @@ public class AuctionDetails implements Serializable{
 	public String getTitle() {
 		return Title;
 	}
-	public int getTicksLeft() {
+	public double getMiliSecondsLeft() {
 		return MiliSecondsLeft;
 	}
-	public void setTicksLeft(int ticksLeft) {
-		MiliSecondsLeft = ticksLeft;
+	public void setMiliSecondsLeft(double d) {
+		MiliSecondsLeft = d;
 	}
-	public int getStartTicks() {
+	public int getStartMiliSeconds() {
 		return StartMiliSeconds;
 	}
 	public AuctionTypes getType() {

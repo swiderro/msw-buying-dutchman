@@ -141,7 +141,7 @@ public class BuyingDutchmanGui extends JFrame {
 
 		@Override
 		public void actionPerformed(ActionEvent ev) {
-			int auctionTimieInMiliSeconds = countTicks();
+			int auctionTimieInMiliSeconds = countMiliSeconds();
 			float priceRange = calculatePriceRange();
 			String title = jTFAuctionTitle.getText().trim();
 			if (auctionTimieInMiliSeconds > 0 && priceRange > 0 && title != null && !title.equalsIgnoreCase("")) {
@@ -860,12 +860,12 @@ public class BuyingDutchmanGui extends JFrame {
 		return priceRange;
 	}
 
-	private int countTicks() {
+	private int countMiliSeconds() {
 		int hours = new Integer(jTFAuctionDurationHours.getText().trim()).intValue();
 		int minutes = new Integer(jTFAuctionDurationMinutes.getText().trim()).intValue();
 		int seconds = new Integer(jTFAuctionDurationSeconds.getText().trim()).intValue();
 		if (hours >= 0 && minutes >= 0 && seconds >= 0)
-			return (int) (hours*60*60*BDC.TICK*BDC.TICKSPERSECOND + minutes*60*BDC.TICK*BDC.TICKSPERSECOND + seconds*BDC.TICK*BDC.TICKSPERSECOND);
+			return (int) (hours*60*60*BDC.MILISECOND + minutes*60*BDC.MILISECOND + seconds*BDC.MILISECOND);
 		else
 			return 0;
 	}

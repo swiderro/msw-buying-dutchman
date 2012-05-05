@@ -43,6 +43,7 @@ public final class BDC {
 	public static final String SDNAMEAUCTION = "Agent Dutch Auctions";
 	public static final String SDPNAME = "Dutch Auction";
 	/** D³ugoœæ okresu zegara wyra¿ona w milisekundach */
+	public static final double MILISECOND = 1000.0;
 	public static final int TICK = 10000;
 	public static final int GUIAUCTION = 0;
 	public static final int GUIBUYNOW = 1;
@@ -50,8 +51,8 @@ public final class BDC {
 	public static final int GUICLOSE = 3;
 	public static final int GUIPROPOSITION = 4;
 	//public static final float TICKSPERSECOND = 1000/TICK;
-	/** Iloœæ okresów zegara na sekundê. Wykorzystywane w {@link BuyingDutchmanGui#countTicks}*/
-	public static final double TICKSPERSECOND = 1000.0/TICK;
+	/** Iloœæ okresów zegara na sekundê. Wykorzystywane w {@link BuyingDutchmanGui#countMiliSeconds}*/
+	public static final double TICKSPERSECOND = MILISECOND/TICK;
 	public static final String PROTOCOLS = "fipa-request fipa-Contract-Net fipa-subscribe fipa-agree fipa-proposal fipa-cfp fipa-accept-proposal";
 	public static final String POSTFIX = ":";
 	public static final String SEPARATOR = ";";
