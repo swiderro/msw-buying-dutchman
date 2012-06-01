@@ -521,6 +521,12 @@ public class BuyingDutchmanAgent extends GuiAgent {
 							, content[j++]
 							, content[j++]          
 						);
+						int historySize = Integer.parseInt(content[j++]);
+						//TODO 007 Z automatycznej zmiany ceny w aukcjach holenderskich robi siê historia ofert.
+						//Is it a bug, or is it a feture?
+						if (historySize > 0) {
+							aa.setBidsHistory(content[j++]);
+						}
 						// If AutomaticBidder exists for this exact auction, run it
 						AutomaticBuyer ab = (AutomaticBuyer) automaticBuyers.get(sender + BDC.POSTFIX + aa.getAN());
 						if (ab!=null)
@@ -641,6 +647,7 @@ public class BuyingDutchmanAgent extends GuiAgent {
 			return BDC.AUCTIONBIDSCOLUMNNAMES.length;
 		}
 
+		@SuppressWarnings("unchecked")
 		@Override
 		public int getRowCount() {
 			int row = myGui.getJTAuctions().getSelectedRow();
@@ -648,10 +655,13 @@ public class BuyingDutchmanAgent extends GuiAgent {
 				return 0;
 			else {
 				Auction a1 = ((Auction) shownAuctions.get(shownAuctionsRowNumber.get(row)));
-				ArrayList a = a1.getBidsHistory();
-				if (a != null)
-					return a.size();
-				else
+				if (a1 != null) {
+					ArrayList a = a1.getBidsHistory();
+					if (a != null)
+						return a.size();
+					else
+						return 0;
+				} else
 					return 0;
 			}
 		}
@@ -835,12 +845,7 @@ public class BuyingDutchmanAgent extends GuiAgent {
 	private String getSingleCFPContent(Auction a) {
 		return 
 			BDC.AUCTION 
-			+ BDC.SEPARATOR + a.getAN() 
-			+ BDC.SEPARATOR + a.getPriceInt() 
-			+ BDC.SEPARATOR + a.getPriceDec() 
-			+ BDC.SEPARATOR + a.getMiliSecondsLeft()
-			+ BDC.SEPARATOR + a.getBestBidString()
-			+ BDC.SEPARATOR + a.getBestBidder()
+			+ BDC.SEPARATOR + a.getCfpContent()
 			;
 	}
 

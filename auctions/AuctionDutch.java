@@ -40,12 +40,13 @@ public class AuctionDutch extends Auction {
 	}
 	@Override
 	protected void performAuctionTick() {
-		setNewPrice(
-			getPrice().subtract(getReductionStep())
-			, getBestBidder()
-		);
+		lowerPrice(getPrice().subtract(getReductionStep()));
 	}
 
+	private void lowerPrice(BigDecimal bid) {
+		if (getPrice().compareTo(bid) > 0)
+			setNewPrice(bid);		
+	}
 	@Override
 	protected boolean isBestBid(BigDecimal bid) {
 		if (bid.compareTo(getBestBid()) > 0)
