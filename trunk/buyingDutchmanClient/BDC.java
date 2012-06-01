@@ -56,6 +56,7 @@ public final class BDC {
 	public static final String PROTOCOLS = "fipa-request fipa-Contract-Net fipa-subscribe fipa-agree fipa-proposal fipa-cfp fipa-accept-proposal";
 	public static final String POSTFIX = ":";
 	public static final String SEPARATOR = ";";
+	public static final String HISTORY_SEPARATOR = "#";
 	public static final String AUCTIONS = "auctions" + POSTFIX;
 	public static final String AUCTION = "auction" + POSTFIX;
 	public static final String AUCTION_INFO = "auction info";

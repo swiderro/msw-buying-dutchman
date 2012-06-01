@@ -3,6 +3,8 @@ package auctions;
 import java.io.Serializable;
 import java.math.BigDecimal;
 
+import buyingDutchmanClient.BDC;
+
 public class Bid  implements Serializable {
 	/**
 	 * 
@@ -33,5 +35,8 @@ public class Bid  implements Serializable {
 		default:
 			return null;
 		}
+	}
+	public String toString() {
+		return BDC.HISTORY_SEPARATOR + bidder + BDC.HISTORY_SEPARATOR + price.toString();
 	}
 }

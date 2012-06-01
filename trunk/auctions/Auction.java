@@ -240,8 +240,9 @@ public abstract class Auction implements Serializable {
 		//iloœæ wpisów w historii;oferent;oferta(xN)
 		bidsHistory.add(new Bid(bidder, bid));
 	}
-	private void setNewPrice(BigDecimal bid) {
+	protected void setNewPrice(BigDecimal bid) {
 		//TODO TEST Po³¹czyæ z setBestBidder. Brawo, bo bêdzie mnóstwo testowania
+		//Wygl¹da na to, ¿e jest ju¿ OK.
 		this.price = bid;
 		String [] p = this.price.toPlainString().split(BDC.REGEXFPOINT);
 		if (p[1].length() >= 2) {
@@ -272,14 +273,32 @@ public abstract class Auction implements Serializable {
 		this.bestBid = bestBid;
 	}
 	public String getCfpContent() {		
-		return getAN()
+		String tmp = getAN()
 		+ BDC.SEPARATOR + getPriceInt() 
 		+ BDC.SEPARATOR + getPriceDec() 
 		+ BDC.SEPARATOR + getMiliSecondsLeft()
 		+ BDC.SEPARATOR + getBestBidString()
-		+ BDC.SEPARATOR + getBestBidder();
+		+ BDC.SEPARATOR + getBestBidder()
+		+ BDC.SEPARATOR + getBidsHistory().size()
+		;
+		int s = getBidsHistory().size();
+		if ( s > 0 )
+			tmp += BDC.SEPARATOR;
+		for (int i = 0; i < s; i++ )
+		{
+			tmp += getBidsHistory().get(i).toString();
+		}
+		return tmp;
 	}
 	public ArrayList getBidsHistory() {
 		return bidsHistory;
+	}
+	@SuppressWarnings("unchecked")
+	public void setBidsHistory(String a) {
+		String [] bids = a.split(BDC.HISTORY_SEPARATOR);
+		bidsHistory.clear();
+		for (int i = 1 ; i < bids.length; ) {
+			bidsHistory.add(new Bid(bids[i++], new BigDecimal(bids[i++])));
+		}
 	}
 }
