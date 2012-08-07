@@ -144,9 +144,6 @@ public abstract class Auction implements Serializable {
 		return auctioneer+BDC.POSTFIX+an;
 	}
 	public final String getBestBidString() {
-		//TODO 0 wczeœniej ta zmienna s³u¿y³a do obs³ugi najwy¿szego oferenta w automatycznych wywo³aniach aukcji
-		// teraz s¹ automaticBid'y, wiêc ta zmienna bêdzie teraz obs³ugiwaæ oferenta aktualnej najlepszej oferty
-		//if (bestBid != null && isFinished())
 		if (bestBid != null)
 			return bestBid.toString();		
 		else
@@ -168,7 +165,7 @@ public abstract class Auction implements Serializable {
 		case 2: return getAuctioneer();
 		case 3: return getCategory();
 		case 4: return getSubCategory();
-		case 5: return getMiliSecondsLeft()/BDC.MILISECOND;
+		case 5: return getMiliSecondsLeft()/BDC.ONE_SECOND;
 		case 6: return getPriceInt()+BDC.POINT+getPriceDec();
 		case 7: return getBestBidString();
 		case 8: return getBestBidder();
@@ -192,7 +189,7 @@ public abstract class Auction implements Serializable {
 		case 2: return getAuctioneer();
 		case 3: return getCategory();
 		case 4: return getSubCategory();
-		case 5: return getMiliSecondsLeft()/BDC.MILISECOND;
+		case 5: return getMiliSecondsLeft()/BDC.ONE_SECOND;
 		case 6: return getPriceInt()+BDC.POINT+getPriceDec();
 		case 7: return getBestBidString();
 		case 8: return getBestBidder();
@@ -227,22 +224,15 @@ public abstract class Auction implements Serializable {
 		bestBidder = bidder;		
 	}
 	public BigDecimal getPrice() {
-		//return Float.valueOf(getAd().getPriceInt()+BDC.FPOINT+getAd().getPriceDec()).floatValue();
 		return this.price;
 	}
 	protected final void setNewPrice(BigDecimal bid, String bidder) {
 		setBestBidder(bidder);
 		setNewPrice(bid);
-		//TODO 2 Zrobienie historii sk³adanych ofert.
 		//Dodaje bidy do aukcji lokalnej, ale nie dodaje do aukcji pokazywanych.
-		//Nale¿y zaimplementowaæ mechanizm rozsy³ania informacji o historii ofert.
-		//mo¿na dorzuciæ do ju¿ istniej¹cego nastêpuj¹ce parametry:
-		//iloœæ wpisów w historii;oferent;oferta(xN)
 		bidsHistory.add(new Bid(bidder, bid));
 	}
 	protected void setNewPrice(BigDecimal bid) {
-		//TODO TEST Po³¹czyæ z setBestBidder. Brawo, bo bêdzie mnóstwo testowania
-		//Wygl¹da na to, ¿e jest ju¿ OK.
 		this.price = bid;
 		String [] p = this.price.toPlainString().split(BDC.REGEXFPOINT);
 		if (p[1].length() >= 2) {

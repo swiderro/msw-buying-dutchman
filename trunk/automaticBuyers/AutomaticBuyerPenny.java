@@ -22,7 +22,7 @@ public class AutomaticBuyerPenny extends AutomaticBuyer {
 
 	@Override
 	public boolean performDuty(Auction auction) {
-		// TODO Do zmiany. Nale¿y wys³aæ wiadomoœæ do auction.getAuctioneer() z poleceniem dodania AutomaticBid
+		// TODO ? Do zmiany. Nale¿y wys³aæ wiadomoœæ do auction.getAuctioneer() z poleceniem dodania AutomaticBid
 		ACLMessage request = agent.getRequestMsg();
 		ACLMessage [] mes = {request};
 		agent.fillUpReceivers(mes, agent.getAgent(auction.getAuctioneer()));

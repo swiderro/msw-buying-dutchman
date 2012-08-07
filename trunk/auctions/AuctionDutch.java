@@ -27,7 +27,6 @@ public class AuctionDutch extends Auction {
 	}
 	@Override
 	public boolean buyNow(String bestBidder) {
-		//TODO sprawdziæ przypisania bestBidInt bestBidDec
 		if (isFinished())
 			return false;
 		else {

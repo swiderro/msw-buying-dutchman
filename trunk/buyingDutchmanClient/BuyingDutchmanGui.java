@@ -31,6 +31,8 @@ import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.PlainDocument;
 
+import buyingDutchmanClient.BDC.AuctionTypes;
+
 import auctions.Auction;
 import auctions.AuctionDetails;
 import auctions.AuctionFactory;
@@ -39,6 +41,112 @@ import auctions.AuctionItem;
 
 public class BuyingDutchmanGui extends JFrame {
 
+	private class commandPanelFactory {
+		
+		private void setEmptyCommandPanel() {
+			jLAuctioner.setVisible(false);
+			jTFAuctioneer.setVisible(false);
+			jLAuctionNr.setVisible(false);
+			jTFAuctionNr.setVisible(false);
+			jBBuyNow.setVisible(false);
+			jBProposition.setVisible(false);
+			jLWaitForPrice.setVisible(false);
+			jTFBidPriceInt.setVisible(false);
+			jLDecimalPoint.setVisible(false);
+			jTFBidPriceDec.setVisible(false);
+			jBWaitAndBuy.setVisible(false);
+			jLUpbid.setVisible(false);
+			jTFUpBidInt.setVisible(false);
+			jLDecimalPointUpBid.setVisible(false);
+			jTFUpBidDec.setVisible(false);
+			jLChooseAuction.setVisible(true);
+			jLRounds.setVisible(false);
+			jTFRoundsQuantity.setVisible(false);
+		}
+		
+		private void setDutchCommandPanel() {
+			jLAuctioner.setVisible(true);
+			jTFAuctioneer.setVisible(true);
+			jLAuctionNr.setVisible(true);
+			jTFAuctionNr.setVisible(true);
+			jBBuyNow.setVisible(true);
+			jBProposition.setVisible(false);
+			jLWaitForPrice.setVisible(true);
+			jTFBidPriceInt.setVisible(true);
+			jLDecimalPoint.setVisible(true);
+			jTFBidPriceDec.setVisible(true);
+			jBWaitAndBuy.setVisible(true);
+			jLUpbid.setVisible(false);
+			jTFUpBidInt.setVisible(false);
+			jLDecimalPointUpBid.setVisible(false);
+			jTFUpBidDec.setVisible(false);
+			jLChooseAuction.setVisible(false);
+			jLRounds.setVisible(false);
+			jTFRoundsQuantity.setVisible(false);
+		}
+		//TODO W przypadku krzaków z upbidem i proposem, czyœciæ przy ukrywaniu
+		private void setEnglishCommandPanel() {
+			jLAuctioner.setVisible(true);
+			jTFAuctioneer.setVisible(true);
+			jLAuctionNr.setVisible(true);
+			jTFAuctionNr.setVisible(true);
+			jBBuyNow.setVisible(false);
+			jBProposition.setVisible(true);
+			jLWaitForPrice.setVisible(true);
+			jTFBidPriceInt.setVisible(true);
+			jLDecimalPoint.setVisible(true);
+			jTFBidPriceDec.setVisible(true);
+			jBWaitAndBuy.setVisible(true);
+			jLUpbid.setVisible(true);
+			jTFUpBidInt.setVisible(true);
+			jLDecimalPointUpBid.setVisible(true);
+			jTFUpBidDec.setVisible(true);
+			jLChooseAuction.setVisible(false);
+			jLRounds.setVisible(false);
+			jTFRoundsQuantity.setVisible(false);
+		}
+
+		private void setPennyCommandPanel() {
+			// TODO Auto-generated method stub
+			jLAuctioner.setVisible(true);
+			jTFAuctioneer.setVisible(true);
+			jLAuctionNr.setVisible(true);
+			jTFAuctionNr.setVisible(true);
+			jBBuyNow.setVisible(false);
+			jBProposition.setVisible(false);
+			jLWaitForPrice.setVisible(true);
+			jTFBidPriceInt.setVisible(true);
+			jLDecimalPoint.setVisible(true);
+			jTFBidPriceDec.setVisible(true);
+			jBWaitAndBuy.setVisible(true);
+			jLUpbid.setVisible(false);
+			jTFUpBidInt.setVisible(false);
+			jLDecimalPointUpBid.setVisible(false);
+			jTFUpBidDec.setVisible(false);
+			jLChooseAuction.setVisible(false);
+			jLRounds.setVisible(true);
+			jTFRoundsQuantity.setVisible(true);
+		}
+		
+		public void commandPanelInstance(BDC.AuctionTypes auctionType) {
+			if (auctionType != null) {
+				switch (auctionType) {
+					case HOLENDERSKA: setDutchCommandPanel(); break;
+					case ANGIELSKA:
+					case DRUGIEJ_CENY:
+					case PRZETARG:
+						setEnglishCommandPanel(); break;
+					case GROSZOWA:
+						setPennyCommandPanel(); break;
+					default: setEmptyCommandPanel();
+				}
+			} else {
+				setEmptyCommandPanel();
+			}
+		}
+		
+	}
+	
 	private class FinishedAuctionsListListener implements ListSelectionListener {
 
 		@Override
@@ -50,6 +158,7 @@ public class BuyingDutchmanGui extends JFrame {
 				} else {
 					jTAFinishedAuctionDescription.setText(null);
 				}
+				myAgent.getBdfabtm().fireTableDataChanged();
 			}
 		}
 
@@ -62,15 +171,16 @@ public class BuyingDutchmanGui extends JFrame {
 			if (!arg0.getValueIsAdjusting()) {
 				Auction a = myAgent.getShownAuction(((DefaultListSelectionModel)arg0.getSource()).getMaxSelectionIndex());
 				if (a != null) {
-					jTFAuctioneer.setText(a.getAuctioneer()); 
-					jTFAuctionNr.setText(a.getAN());
+					auctionCommandPanelFactory.commandPanelInstance(a.getType());
+					jPAuctionCommand.repaint();
+					setAuctioneerAuctionNumber(a.getAuctioneer(), a.getAN(), a.getType());					
 					jTAAuctionDescription.setText(a.getAI().getItemDescription());
 				} else {
-					jTFAuctioneer.setText(null);
-					jTFAuctionNr.setText(null);
+					//jTFAuctioneer.setText(null);
+					//jTFAuctionNr.setText(null);
 					jTAAuctionDescription.setText(null);
 				}
-				myAgent.getBdadtm().fireTableDataChanged();
+				myAgent.getBdabtm().fireTableDataChanged();
 			}
 		}
 
@@ -244,6 +354,20 @@ public class BuyingDutchmanGui extends JFrame {
 
 	private JTable jTAuctionBidHistory = null;
 
+	private JTable jTFinishedAuctionBidHistory;  //  @jve:decl-index=0:
+
+	private JScrollPane jSPFinishedAuctionBidHistory;
+
+	private commandPanelFactory auctionCommandPanelFactory;
+
+	private JLabel jLChooseAuction;
+
+	private JLabel jLRounds;
+
+	private JTextField jTFRoundsQuantity;
+
+	private BDC.AuctionTypes currentAuctionType;
+
 	/**
 	 * This method initializes 
 	 * 
@@ -262,10 +386,10 @@ public class BuyingDutchmanGui extends JFrame {
 	 * 
 	 */
 	private void initialize() {
+		this.auctionCommandPanelFactory = new commandPanelFactory();
         this.setSize(new Dimension(BDC.FRAMEWIDTH, BDC.FRAMEHEIGHT));
         this.setContentPane(getJContentPane());
         this.setTitle(myAgent.getLocalName()+" "+BDC.FRAMETITLE);
-			
 	}
 
 	/**
@@ -515,14 +639,18 @@ public class BuyingDutchmanGui extends JFrame {
 			jLAuctioner.setText(BDC.AUCTIONEER);
 			jLAuctionNr = new JLabel();
 			jLAuctionNr.setText(BDC.AUCTIONNUMBER);
-			FlowLayout flowLayout3 = new FlowLayout();
-			flowLayout3.setHgap(5);
-			flowLayout3.setAlignment(java.awt.FlowLayout.CENTER);
-			flowLayout3.setVgap(0);
 			jLDecimalPoint = new JLabel();
 			jLDecimalPoint.setText(BDC.DECIMALPOINT);
 			jLWaitForPrice = new JLabel();
 			jLWaitForPrice.setText(BDC.BIDDERPRICE);
+			jLRounds = new JLabel(); //TODO <--- TU SKOÑCZY£EM
+			jLRounds.setText(BDC.STAYINAUCTION);
+			jLChooseAuction = new JLabel();
+			jLChooseAuction.setText(BDC.EMPTYCOMMANDPANELTEXT);
+			FlowLayout flowLayout3 = new FlowLayout();
+			flowLayout3.setHgap(5);
+			flowLayout3.setAlignment(java.awt.FlowLayout.CENTER);
+			flowLayout3.setVgap(0);
 			jPAuctionCommand = new JPanel();
 			jPAuctionCommand.setLayout(flowLayout3);
 			jPAuctionCommand.add(jLAuctioner, null);
@@ -540,8 +668,21 @@ public class BuyingDutchmanGui extends JFrame {
 			jPAuctionCommand.add(getJTFUpBidInt(new JTFIntLength()), null);
 			jPAuctionCommand.add(jLDecimalPointUpBid, null);
 			jPAuctionCommand.add(getJTFUpBidDec(new JTFDecLength()), null);
+			jPAuctionCommand.add(jLRounds, null);
+			jPAuctionCommand.add(getJTFRoundsQuantity(new JTFRoundsQuantity()), null);
+			jPAuctionCommand.add(jLChooseAuction, null);
+			//Poni¿sze wywo³ywane, by ukryæ odpowiednie elementy
+			auctionCommandPanelFactory.commandPanelInstance(null);
 		}
 		return jPAuctionCommand;
+	}
+
+	private JTextField getJTFRoundsQuantity(PlainDocument roundsQuantity) {
+		if (jTFRoundsQuantity == null) {
+			jTFRoundsQuantity = new JTextField(BDC.ROUNDSQUANTITYCOLUMNS);
+			jTFUpBidDec.setDocument(roundsQuantity);
+		}
+		return jTFRoundsQuantity;
 	}
 
 	private JTextField getJTFAuctionNr() {
@@ -865,7 +1006,7 @@ public class BuyingDutchmanGui extends JFrame {
 		int minutes = new Integer(jTFAuctionDurationMinutes.getText().trim()).intValue();
 		int seconds = new Integer(jTFAuctionDurationSeconds.getText().trim()).intValue();
 		if (hours >= 0 && minutes >= 0 && seconds >= 0)
-			return (int) (hours*60*60*BDC.MILISECOND + minutes*60*BDC.MILISECOND + seconds*BDC.MILISECOND);
+			return (int) (hours*60*60*BDC.ONE_SECOND + minutes*60*BDC.ONE_SECOND + seconds*BDC.ONE_SECOND);
 		else
 			return 0;
 	}
@@ -948,6 +1089,22 @@ public class BuyingDutchmanGui extends JFrame {
 				super.insertString(offset, str, attr);
 		}		
 	}
+	
+	private class JTFRoundsQuantity extends JTFNumberOnly {
+		private static final long serialVersionUID = 1L;
+		private int limit;	  
+		
+		JTFRoundsQuantity() {
+			super();
+			this.limit = 6;
+		}	   	  
+		
+		public void insertString(int offset, String  str, AttributeSet attr) {
+			if (str == null) return;
+			if ((getLength() + str.length()) <= limit)				
+				super.insertString(offset, str, attr);
+		}		
+	}
 
 	/**
 	 * This method initializes jPAuctions1	
@@ -956,20 +1113,29 @@ public class BuyingDutchmanGui extends JFrame {
 	 */
 	private JPanel getJPFinishedAuctions() {
 		if (jPFinishedAuctions == null) {
-			GridBagConstraints gridBagConstraints5 = new GridBagConstraints();
-			gridBagConstraints5.fill = GridBagConstraints.BOTH;
-			gridBagConstraints5.weighty = 0.6;
-			gridBagConstraints5.weightx = 1.0;
-			gridBagConstraints5.gridx = 0;
-			gridBagConstraints5.gridy = 1;
 			GridBagConstraints gridBagConstraints4 = new GridBagConstraints();
 			gridBagConstraints4.fill = GridBagConstraints.BOTH;
 			gridBagConstraints4.weighty = 1.0;
-			gridBagConstraints4.weightx = 1.0;			
+			gridBagConstraints4.weightx = 1.0;
+			gridBagConstraints4.gridx = 0;
+			gridBagConstraints4.gridwidth = 2;
+			GridBagConstraints gridBagConstraints5 = new GridBagConstraints();
+			gridBagConstraints5.fill = GridBagConstraints.BOTH;
+			gridBagConstraints5.weighty = 1.0;
+			gridBagConstraints5.weightx = 0.5;
+			gridBagConstraints5.gridx = 0;
+			gridBagConstraints5.gridy = 1;
+			GridBagConstraints gridBagConstraints6 = new GridBagConstraints();
+			gridBagConstraints6.fill = GridBagConstraints.BOTH;
+			gridBagConstraints6.weighty = 1.0;
+			gridBagConstraints6.weightx = 0.5;
+			gridBagConstraints6.gridx = 1;
+			gridBagConstraints6.gridy = 1;
 			jPFinishedAuctions = new JPanel();
 			jPFinishedAuctions.setLayout(new GridBagLayout());
 			jPFinishedAuctions.add(getJSPFinishedAuctions(), gridBagConstraints4);
 			jPFinishedAuctions.add(getJSPFinishedAuctionDescription(), gridBagConstraints5);
+			jPFinishedAuctions.add(getJSPFinishedAuctionBidHistory(), gridBagConstraints6);
 		}
 		return jPFinishedAuctions;
 	}
@@ -1019,7 +1185,7 @@ public class BuyingDutchmanGui extends JFrame {
 	 */    
 	public JTable getJTFinishedAuctions() {
 		if (jTFinishedAuctions == null) {
-			jTFinishedAuctions = new JTable(myAgent.getBdaftm());
+			jTFinishedAuctions = new JTable(myAgent.getBdfatm());
 			for (int i = 0; i < BDC.FINISHEDAUCTIONSCOLUMNNAMES.length; i++) {
 				jTFinishedAuctions.getColumnModel().getColumn(i).setHeaderValue(BDC.FINISHEDAUCTIONSCOLUMNNAMES[i]);
 				jTFinishedAuctions.getColumnModel().getColumn(i).setPreferredWidth(BDC.FINISHEDAUCTIONSCOLUMNWIDTH[i]);
@@ -1137,6 +1303,19 @@ public class BuyingDutchmanGui extends JFrame {
 		}
 		return jSPAuctionBidHistory;
 	}
+	
+	/**
+	 * This method initializes jSPFinishedAuctionBidHistory	
+	 * 	
+	 * @return javax.swing.JScrollPane	
+	 */
+	private JScrollPane getJSPFinishedAuctionBidHistory() {
+		if (jSPFinishedAuctionBidHistory == null) {
+			jSPFinishedAuctionBidHistory = new JScrollPane();
+			jSPFinishedAuctionBidHistory.setViewportView(getJTFinishedAuctionBidHistory());
+		}
+		return jSPFinishedAuctionBidHistory;
+	}
 
 	/**
 	 * This method initializes jTAuctionBidHistory	
@@ -1145,7 +1324,7 @@ public class BuyingDutchmanGui extends JFrame {
 	 */
 	private JTable getJTAuctionBidHistory() {
 		if (jTAuctionBidHistory == null) {
-			jTAuctionBidHistory = new JTable(myAgent.getBdadtm());
+			jTAuctionBidHistory = new JTable(myAgent.getBdabtm());
 			for (int i = 0; i < BDC.AUCTIONBIDSCOLUMNNAMES.length; i++) {
 				jTAuctionBidHistory.getColumnModel().getColumn(i).setHeaderValue(BDC.AUCTIONBIDSCOLUMNNAMES[i]);
 				jTAuctionBidHistory.getColumnModel().getColumn(i).setPreferredWidth(BDC.AUCTIONBIDSCOLUMNWIDTH[i]);
@@ -1156,5 +1335,33 @@ public class BuyingDutchmanGui extends JFrame {
 		}
 		return jTAuctionBidHistory;
 	}
+	/**
+	 * This method initializes jTAuctionBidHistory	
+	 * 	
+	 * @return javax.swing.JTable	
+	 */
+	private JTable getJTFinishedAuctionBidHistory() {
+		if (jTFinishedAuctionBidHistory == null) {
+			jTFinishedAuctionBidHistory = new JTable(myAgent.getBdfabtm());
+			for (int i = 0; i < BDC.AUCTIONBIDSCOLUMNNAMES.length; i++) {
+				jTFinishedAuctionBidHistory.getColumnModel().getColumn(i).setHeaderValue(BDC.AUCTIONBIDSCOLUMNNAMES[i]);
+				jTFinishedAuctionBidHistory.getColumnModel().getColumn(i).setPreferredWidth(BDC.AUCTIONBIDSCOLUMNWIDTH[i]);
+			}
+			jTFinishedAuctionBidHistory.getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+			jTFinishedAuctionBidHistory.setColumnSelectionAllowed(false);
+			jTFinishedAuctionBidHistory.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
+		}
+		return jTFinishedAuctionBidHistory;
+	}
 	
+	/**
+	 * Metoda s³u¿y do ustawiania sprzeedawcy i nr aukcji na panelu poleceñ aukcji JPAuctionCommand
+	 * @param type 
+	 * 
+	 * */
+	public void setAuctioneerAuctionNumber(String auctioneer, String an, AuctionTypes type) {
+		jTFAuctioneer.setText(auctioneer); 
+		jTFAuctionNr.setText(an);
+		currentAuctionType = type;
+	}
 }

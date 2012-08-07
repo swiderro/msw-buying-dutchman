@@ -7,7 +7,7 @@ import java.util.Iterator;
 import buyingDutchmanClient.BDC;
 
 public class AuctionPenny extends Auction {
-	//TODO nie dzia³a poprawnie sk³adanie oferty dla tego typu aukcji. Do poprawy.
+	//TODO ? nie dzia³a poprawnie sk³adanie oferty dla tego typu aukcji. Do poprawy.
 	private HashMap<String, AutomaticBid> automaticBids;
 
 	public AuctionPenny(AuctionDetails AD, AuctionItem AI, String AN,
@@ -93,7 +93,7 @@ public class AuctionPenny extends Auction {
 								, bidder
 							);
 							// Prolongs auction time by number of seconds equal to number of automatic bidders that still can provide
-							setMiliSecondsLeft(getMiliSecondsLeft()+BDC.MILISECOND);
+							setMiliSecondsLeft(getMiliSecondsLeft()+BDC.ONE_SECOND);
 							setBestBid(getPrice(), bidder);
 						} else {
 							// Removing bidder, that can't provide
@@ -108,6 +108,7 @@ public class AuctionPenny extends Auction {
 					automaticBids.remove(ab);
 				}
 			}
+			//Okreœla, ile automatów w danym wykonaniu przd³u¿a³o aukcje. Jeœli nie ma konkurencji, koñczy aukcjê
 			if (usedBids<2)
 				setFinished(true);
 	}
