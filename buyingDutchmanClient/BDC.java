@@ -43,7 +43,7 @@ public final class BDC {
 	public static final String SDNAMEAUCTION = "Agent Dutch Auctions";
 	public static final String SDPNAME = "Dutch Auction";
 	/** D³ugoœæ okresu zegara wyra¿ona w milisekundach */
-	public static final double MILISECOND = 1000.0;
+	public static final double ONE_SECOND = 1000.0;
 	public static final int TICK = 10000;
 	public static final int GUIAUCTION = 0;
 	public static final int GUIBUYNOW = 1;
@@ -52,7 +52,7 @@ public final class BDC {
 	public static final int GUIPROPOSITION = 4;
 	//public static final float TICKSPERSECOND = 1000/TICK;
 	/** Iloœæ okresów zegara na sekundê. Wykorzystywane w {@link BuyingDutchmanGui#countMiliSeconds}*/
-	public static final double TICKSPERSECOND = MILISECOND/TICK;
+	public static final double TICKSPERSECOND = ONE_SECOND/TICK;
 	public static final String PROTOCOLS = "fipa-request fipa-Contract-Net fipa-subscribe fipa-agree fipa-proposal fipa-cfp fipa-accept-proposal";
 	public static final String POSTFIX = ":";
 	public static final String SEPARATOR = ";";
@@ -122,7 +122,7 @@ public final class BDC {
 	public static final int AUCTIONEERCOLUMNS = 5;
 	public static final String AUCTIONNUMBER = "Nr aukcji";
 	public static final int AUCTIONNUMBERCOLUMNS = 4;
-	public static final String FINISHEDAUCTIONSTAB = "Moje aukcje";
+	public static final String FINISHEDAUCTIONSTAB = "Zakoñczone aukcje";
 	public static final String CATEGORYLABEL = "Kategoria";
 	public static final String AUCTIONTYPELABEL = "Typ aukcji";
 	public static final String UPBID = "Podbijaj o:";
@@ -168,4 +168,7 @@ public final class BDC {
 	public static final double Grosz = 0.01;
 	public static final int BigDecimalScale = 16;
 	public static final int BigDecimalRounding = BigDecimal.ROUND_HALF_EVEN;
+	public static final String EMPTYCOMMANDPANELTEXT = "Wybierz aukcjê z powy¿szej listy.";
+	public static final String STAYINAUCTION = "Iloœæ rund w aukcji";
+	public static final int ROUNDSQUANTITYCOLUMNS = 6;
 }
