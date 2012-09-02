@@ -242,6 +242,7 @@ public class BuyingDutchmanGui extends JFrame {
 			e.addParameter(jTFAuctioneer.getText().trim());
 			e.addParameter(jTFBidPriceInt.getText().trim()+BDC.FPOINT+jTFBidPriceDec.getText().trim());
 			e.addParameter(jTFUpBidInt.getText().trim()+BDC.FPOINT+jTFUpBidDec.getText().trim());
+			e.addParameter(jTFRoundsQuantity.getText().trim());
 			myAgent.postGuiEvent(e);
 		}
 
@@ -680,7 +681,8 @@ public class BuyingDutchmanGui extends JFrame {
 	private JTextField getJTFRoundsQuantity(PlainDocument roundsQuantity) {
 		if (jTFRoundsQuantity == null) {
 			jTFRoundsQuantity = new JTextField(BDC.ROUNDSQUANTITYCOLUMNS);
-			jTFUpBidDec.setDocument(roundsQuantity);
+			jTFRoundsQuantity.setDocument(roundsQuantity);
+			jTFRoundsQuantity.setText("0");
 		}
 		return jTFRoundsQuantity;
 	}
@@ -1100,7 +1102,7 @@ public class BuyingDutchmanGui extends JFrame {
 		}	   	  
 		
 		public void insertString(int offset, String  str, AttributeSet attr) {
-			if (str == null) return;
+			if (str == null) super.insertString(offset, "0", attr);
 			if ((getLength() + str.length()) <= limit)				
 				super.insertString(offset, str, attr);
 		}		

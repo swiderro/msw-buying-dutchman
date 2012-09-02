@@ -40,6 +40,4 @@ public class AuctionBidding extends Auction {
 				return false;
 		}
 	}
-
-
 }

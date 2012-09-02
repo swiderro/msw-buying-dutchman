@@ -12,6 +12,7 @@ public abstract class Auction implements Serializable {
 	private final AuctionDetails ad;
 	private final AuctionItem ai;
 	private final String an;
+	/** wystawca */
 	private final String auctioneer;
 	protected String bestBidInt;
 	protected String bestBidDec;
@@ -167,7 +168,7 @@ public abstract class Auction implements Serializable {
 		case 4: return getSubCategory();
 		case 5: return getMiliSecondsLeft()/BDC.ONE_SECOND;
 		case 6: return getPriceInt()+BDC.POINT+getPriceDec();
-		case 7: return getBestBidString();
+		case 7: return BDC.NONESTRING;// 2012-08-15 Jak sobie przypomnê, po co ma byæ, to bêdê pokazywaæ MSW// getBestBidString();
 		case 8: return getBestBidder();
 		case 9: return getTitle();
 		}
@@ -176,10 +177,10 @@ public abstract class Auction implements Serializable {
 	public AuctionTypes getType() {
 		return getAd().getType();
 	}
-	private String getSubCategory() {
+	protected String getSubCategory() {
 		return ai.getSubCategory().toString();
 	}
-	private String getCategory() {		
+	protected String getCategory() {		
 		return ai.getCategory().toString();
 	}
 	public Object getFinishedColumnValue(int col) {
@@ -191,7 +192,7 @@ public abstract class Auction implements Serializable {
 		case 4: return getSubCategory();
 		case 5: return getMiliSecondsLeft()/BDC.ONE_SECOND;
 		case 6: return getPriceInt()+BDC.POINT+getPriceDec();
-		case 7: return getBestBidString();
+		case 7: return BDC.NONESTRING;// 2012-08-15 Jak sobie przypomnê, po co ma byæ, to bêdê pokazywaæ MSW// getBestBidString();
 		case 8: return getBestBidder();
 		case 9: return getTitle();
 		}
@@ -270,11 +271,12 @@ public abstract class Auction implements Serializable {
 		+ BDC.SEPARATOR + getBestBidString()
 		+ BDC.SEPARATOR + getBestBidder()
 		+ BDC.SEPARATOR + getBidsHistory().size()
+		+ BDC.SEPARATOR 
 		;
-		int s = getBidsHistory().size();
-		if ( s > 0 )
-			tmp += BDC.SEPARATOR;
-		for (int i = 0; i < s; i++ )
+		/*int s = getBidsHistory().size();*/
+		if ( getBidsHistory().size() < 1 )
+			tmp += BDC.NONESTRING;
+		for (int i = 0; i < getBidsHistory().size(); i++ )
 		{
 			tmp += getBidsHistory().get(i).toString();
 		}

@@ -77,6 +77,33 @@ public class LoginGui extends JFrame{
 		initialize();
 	}
 	
+	public LoginGui(String[] args) {
+		super();
+		initialize();
+		//no agents names nor host name
+		if (args.length < 1)
+			return;
+		//there is at least host name
+		String host = args[args.length-1];
+		setHost(host);
+		//checking for agent names
+		if (args.length > 1) {
+			for (int i = 0; i<args.length-1; i++) {
+				//run agent on the host
+				setAgentName(args[i]);
+				connect();
+			}
+		}
+	}
+
+	private void setAgentName(String agentName) {
+		getJTFLogin().setText(agentName);
+	}
+
+	private void setHost(String host) {
+		getJTFHost().setText(host);
+	}
+
 	/**
 	 * Metoda inicializuj¹ca okno logowania. 
 	 */
@@ -169,8 +196,6 @@ public class LoginGui extends JFrame{
 		if (jTFHost == null) {
 			jTFHost = new JTextField(LOGINCOLUMNSNUMBER);
 			jTFHost.setName(LOGINTEXTFIELDINFO);
-			//TODO Delete after testing
-			jTFHost.setText("Marcin-PC");
 		}
 		return jTFHost;
 	}

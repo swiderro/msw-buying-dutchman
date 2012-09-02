@@ -44,7 +44,7 @@ public final class BDC {
 	public static final String SDPNAME = "Dutch Auction";
 	/** D³ugoœæ okresu zegara wyra¿ona w milisekundach */
 	public static final double ONE_SECOND = 1000.0;
-	public static final int TICK = 10000;
+	public static final int TICK = 1000;
 	public static final int GUIAUCTION = 0;
 	public static final int GUIBUYNOW = 1;
 	public static final int GUIWAITBUY = 2;
@@ -77,6 +77,7 @@ public final class BDC {
 	public static final int WAITBUYAUCTIONEERPARAMNUM = 1;
 	public static final int WAITBUYBIDPARAMNUM = 2;
 	public static final int WAITBUYUPBIDPARAMNUM = 3;
+	public static final int WAITBUYROUNDSPARAMNUM = 4;	
 	public static final int PROPOSEAUCTIONNRPARAMNUM = 0;
 	public static final int PROPOSEAUCTIONEERPARAMNUM = 1;
 	public static final int PROPOSEBIDPARAMNUM = 2;

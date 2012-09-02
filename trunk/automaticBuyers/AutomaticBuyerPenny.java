@@ -8,16 +8,16 @@ import buyingDutchmanClient.BDC;
 import buyingDutchmanClient.BuyingDutchmanAgent;
 import buyingDutchmanClient.BDC.AuctionTypes;
 import auctions.Auction;
-
+//TODO sprawdziæ, czy jest u¿ywane
 public class AutomaticBuyerPenny extends AutomaticBuyer {
 
-	private int upBids;
+	private int rounds;
 	
 	public AutomaticBuyerPenny(BuyingDutchmanAgent agent, BigDecimal bid,
-			BigDecimal upBid) {
+			int rounds) {
 		super(agent, bid);
 		this.type = AuctionTypes.GROSZOWA;
-		upBids = upBid.intValue();
+		this.rounds = rounds;
 	}
 
 	@Override
@@ -26,7 +26,7 @@ public class AutomaticBuyerPenny extends AutomaticBuyer {
 		ACLMessage request = agent.getRequestMsg();
 		ACLMessage [] mes = {request};
 		agent.fillUpReceivers(mes, agent.getAgent(auction.getAuctioneer()));
-		request.setContent(BDC.AUTOMATIC_BID+BDC.SEPARATOR+auction.getAN()+BDC.SEPARATOR+upBids+BDC.SEPARATOR+bid.toPlainString());
+		request.setContent(BDC.AUTOMATIC_BID+BDC.SEPARATOR+auction.getAN()+BDC.SEPARATOR+rounds+BDC.SEPARATOR+bid.toPlainString());
 		agent.send(request);
 		return false;
 	}

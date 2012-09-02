@@ -1,9 +1,14 @@
 package auctions;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
 
-public class AutomaticBid {
+public class AutomaticBid implements Serializable {
 	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	private int bidCounter;
 	private BigDecimal startPrice;
 	private int bidsUsed;

@@ -60,6 +60,8 @@ public class BuyingDutchmanAgent extends GuiAgent {
 	private Hashtable ownFreshlyFinishedAuctions;
 	/** Trwaj¹ce aukcje wyœwietlane przez agenta */
 	private Hashtable shownAuctions;
+	/** Trwaj¹ce aukcje, o których obiekt agent poprosi³ */
+	private Vector requestedAuctions;
 	/** Wektor okreœlaj¹cy kolejnoœæ wyœwietlania trwaj¹cych aukcji */
 	private Vector shownAuctionsRowNumber;
 	/** Flaga u¿ywana w celu odœwie¿ania tabeli trwaj¹cych aukcji */
@@ -99,6 +101,7 @@ public class BuyingDutchmanAgent extends GuiAgent {
 		ownActiveAuctions = new Hashtable();
 		ownFreshlyFinishedAuctions = new Hashtable();
 		shownAuctions = new Hashtable();
+		requestedAuctions = new Vector();
 		shownAuctionsRowNumber = new Vector();
 		finishedAuctions = new Hashtable();
 		automaticBuyers = new Hashtable();
@@ -187,12 +190,13 @@ public class BuyingDutchmanAgent extends GuiAgent {
 							.getParameter(BDC.PROPOSEBIDPARAMNUM)));
 		}
 		if (ev.getType() == BDC.GUIWAITBUY) {
-			waitAndBuy((String) ev.getParameter(BDC.WAITBUYAUCTIONNRPARAMNUM),
-					(String) ev.getParameter(BDC.WAITBUYAUCTIONEERPARAMNUM),
-					new BigDecimal((String) ev
-							.getParameter(BDC.WAITBUYBIDPARAMNUM)),
-					new BigDecimal((String) ev
-							.getParameter(BDC.WAITBUYUPBIDPARAMNUM)));
+			waitAndBuy(
+				(String) ev.getParameter(BDC.WAITBUYAUCTIONNRPARAMNUM),
+				(String) ev.getParameter(BDC.WAITBUYAUCTIONEERPARAMNUM),
+				new BigDecimal((String) ev.getParameter(BDC.WAITBUYBIDPARAMNUM)),
+				new BigDecimal((String) ev.getParameter(BDC.WAITBUYUPBIDPARAMNUM)),
+				Integer.parseInt(((String) ev.getParameter(BDC.WAITBUYROUNDSPARAMNUM)))
+			);
 		}
 		if (ev.getType() == BDC.GUICLOSE) {
 			doDelete();
@@ -212,16 +216,17 @@ public class BuyingDutchmanAgent extends GuiAgent {
 	 *            kwota graniczna, od/do której agent ma licytowaæ.
 	 * @param upBid
 	 *            kwota, o któr¹ agent bêdzie podbija³ cenê aukcji.
+	 * @param rounds 
 	 */
 	private void waitAndBuy(String auctionNr, String auctioneer,
-			BigDecimal bid, BigDecimal upBid) {
+			BigDecimal bid, BigDecimal upBid, int rounds) {
 		if (fraudBid(auctioneer))
 			return;
 		Auction a = (Auction) shownAuctions.get(auctioneer + BDC.POSTFIX
 				+ auctionNr);
 		if (a != null) {
 			AutomaticBuyer ab = AutomaticBuyerFactory.AutomaticBuyerInstance(
-					this, bid, upBid, a.getType());
+					this, bid, upBid, rounds, a.getType());
 			if (ab != null) {
 				automaticBuyers.put(auctioneer + BDC.POSTFIX + auctionNr, ab);
 				if (!ab.performDuty(a))
@@ -511,14 +516,17 @@ public class BuyingDutchmanAgent extends GuiAgent {
 					// auctioneer
 					// to obey the rule:
 					// "Auctioneer shows the same informations as other agents"
-					reply = getAcceptProposalMsg(a);
-					reply.addReceiver(getAID());
-					reply.addReceiver(sender);
+					
+					//MSW 2012-08-11
+					//nie wysy³a wiadomoœci o zaakceptowaniu oferty. bêdzie wysy³aæ, gdy aukcja siê zakoñczy
+					//reply = getAcceptProposalMsg(a);
+					//reply.addReceiver(getAID());
+					//reply.addReceiver(sender);
 				} else {
 					reply = getRejectProposalMsg();
 					reply.addReceiver(sender);
+					send(reply);
 				}
-				send(reply);
 			} else if (content[0].equalsIgnoreCase(BDC.BID)) {
 				Auction a = (Auction) ownActiveAuctions.get(content[1]);
 				if (a != null) {
@@ -553,16 +561,21 @@ public class BuyingDutchmanAgent extends GuiAgent {
 			String sender = msg.getSender().getLocalName();
 			if (content[0].equals(BDC.AUCTIONS)
 					|| content[0].equals(BDC.AUCTION)) {
-				for (int j = 1; j < content.length;) {
-					Auction aa = (Auction) shownAuctions.get(sender
-							+ BDC.POSTFIX + content[j++]);
+				for (int j = 1; j < content.length; j+=8) {
+					Auction aa = (Auction) shownAuctions.get(sender + BDC.POSTFIX + content[j]);
 					if (aa != null) {
-						aa.onTick(content[j++], content[j++], new Double(
-								content[j++]).doubleValue(), content[j++],
-								content[j++]);
-						int historySize = Integer.parseInt(content[j++]);
+						aa.onTick(
+							content[j+1]
+					        , content[j+2]
+					        , new Double(content[j+3]).doubleValue()
+					        , content[j+4]
+					        , content[j+5]
+				        );
+						int historySize = Integer.parseInt(content[j+6]);
 						if (historySize > 0) {
-							aa.setBidsHistory(content[j++]);
+							//TODO nale¿y umieszczaæ historiê w ka¿dej aukcji. wtedy j++ bêdzie mo¿na zast¹piæ j+x i dodaæ j+=xx do pêtli for
+							// i prawid³owo obs³u¿yæ liniê 594, z u¿yciem content[j] zamiast content[1]
+							aa.setBidsHistory(content[j+7]);
 						}
 						// If AutomaticBidder exists for this exact auction, run
 						// it
@@ -575,11 +588,13 @@ public class BuyingDutchmanAgent extends GuiAgent {
 						setRefreshAuctionsTable(true);
 					} else {
 						// Auction is running, but it isn't shown yet.
-						ACLMessage req = getRequestMsg();
-						req.addReceiver(msg.getSender());
-						req.setContent(BDC.AUCTION_INFO + BDC.SEPARATOR
-								+ content[1]);
-						send(req);
+						if (!requestedAuctions.contains(sender + BDC.POSTFIX + content[j])) {
+							requestedAuctions.add(sender + BDC.POSTFIX + content[j]);
+							ACLMessage req = getRequestMsg();
+							req.addReceiver(msg.getSender());
+							req.setContent(BDC.AUCTION_INFO + BDC.SEPARATOR + content[j]);
+							send(req);
+						}
 					}
 				}
 			}
@@ -599,11 +614,12 @@ public class BuyingDutchmanAgent extends GuiAgent {
 						e.printStackTrace();
 					}
 			} else if (content[0].equals(BDC.AUTOMATIC_BID)) {
-				AuctionPenny a = (AuctionPenny) ownActiveAuctions
-						.get(content[1]);
+				AuctionPenny a = (AuctionPenny) ownActiveAuctions.get(content[1]);
 				if (a != null) {
 					AutomaticBid ab = new AutomaticBid(Integer.valueOf(
-							content[2]).intValue(), new BigDecimal(content[3]));
+						content[2]).intValue()
+						, new BigDecimal(content[3])
+					);
 					a.addAutomaticBid(msg.getSender().getLocalName(), ab);
 				}
 			}
@@ -614,16 +630,19 @@ public class BuyingDutchmanAgent extends GuiAgent {
 			String sender = msg.getSender().getLocalName();
 			// Auction are going to be finished, need to save selection
 			if (content[0].equals(BDC.FINISHED)) {
-				int i = myGui.getJTAuctions().getSelectionModel()
-						.getMaxSelectionIndex();
-				if (i >= 0)
-					selection = (String) shownAuctionsRowNumber.get(i);
-				for (int j = 1; j < content.length; j += 1) {
-					Auction a = (Auction) shownAuctions.remove(sender
-							+ BDC.POSTFIX + content[j]);
-					shownAuctionsRowNumber.remove(a.getAuctioneerAN());
-					automaticBuyers.remove(sender + BDC.POSTFIX + content[j]);
+				int i = myGui.getJTAuctions().getSelectionModel().getMaxSelectionIndex();
+				try {
+					if (i >= 0)
+						selection = (String) shownAuctionsRowNumber.get(i);
+				}
+				catch (IndexOutOfBoundsException e) {
+					selection = null;
+				}
+				for (int j = 1; j < content.length; j++) {
+					Auction a = (Auction) shownAuctions.remove(sender + BDC.POSTFIX + content[j]);
 					if (a != null) {
+						shownAuctionsRowNumber.remove(a.getAuctioneerAN());
+						automaticBuyers.remove(sender + BDC.POSTFIX + content[j]);
 						// ZAKOÑCZONE AUKCJE WIDOCZNE DLA WSZYSTKICH AGENTÓW
 						/*if (a.getAuctioneer().equalsIgnoreCase(getLocalName())
 								|| a.getBestBidder().equalsIgnoreCase(
@@ -721,11 +740,14 @@ public class BuyingDutchmanAgent extends GuiAgent {
 			int r = myGui.getJTAuctions().getSelectedRow();
 			if (r < 0)
 				return null;
-			Auction a = ((Auction) shownAuctions.get(shownAuctionsRowNumber
-					.get(r)));
-			if (a != null && row < a.getBidsHistory().size()) {
-				return ((Bid) a.getBidsHistory().get(row)).getColumnValue(col);
-			}
+			try {
+				Auction a = ((Auction) shownAuctions.get(shownAuctionsRowNumber.get(r)));
+				if (a != null && row < a.getBidsHistory().size()) {
+					return ((Bid) a.getBidsHistory().get(row)).getColumnValue(col);
+				}
+			} 
+			catch (ArrayIndexOutOfBoundsException e) {}
+			catch (NullPointerException e) {}
 			return null;
 		}
 
@@ -764,10 +786,13 @@ public class BuyingDutchmanAgent extends GuiAgent {
 			int r = myGui.getJTFinishedAuctions().getSelectedRow();
 			if (r < 0)
 				return null;
-			Auction a = ((Auction) finishedAuctions.get(finishedAuctionsRowNumber.get(r)));
-			if (a != null && row < a.getBidsHistory().size()) {
-				return ((Bid) a.getBidsHistory().get(row)).getColumnValue(col);
+			try {
+				Auction a = ((Auction) finishedAuctions.get(finishedAuctionsRowNumber.get(r)));
+				if (a != null && row < a.getBidsHistory().size()) {
+					return ((Bid) a.getBidsHistory().get(row)).getColumnValue(col);
+				}
 			}
+			catch (IndexOutOfBoundsException e) {}
 			return null;
 		}
 
@@ -794,8 +819,7 @@ public class BuyingDutchmanAgent extends GuiAgent {
 		@Override
 		public Object getValueAt(int row, int col) {
 			if (row < shownAuctionsRowNumber.size()) {
-				Auction a = (Auction) shownAuctions.get(shownAuctionsRowNumber
-						.get(row));
+				Auction a = (Auction) shownAuctions.get(shownAuctionsRowNumber.get(row));
 				if (a != null) {
 					return a.getColumnValue(col);
 				}
@@ -900,7 +924,7 @@ public class BuyingDutchmanAgent extends GuiAgent {
 	private void setRefreshAuctionsTable(boolean b) {
 		refreshAuctionsTable = b;
 	}
-
+	//wo³ane dopiero po zakoñczeniu aukcji
 	private void refreshAuctionsTable() {
 		if (refreshAuctionsTable) {
 			int row = myGui.getJTAuctions().getSelectedRow();
