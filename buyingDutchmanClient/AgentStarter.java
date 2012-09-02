@@ -18,7 +18,7 @@ public class AgentStarter {
 			new Runnable(){
 	           public void run(){
 	              try{
-	            	  new LoginGui();
+	            	  new LoginGui(args);
 	              }
 	              catch (Exception ex){
 	                 ex.printStackTrace();
