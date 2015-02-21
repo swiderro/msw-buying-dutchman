@@ -1,10 +1,10 @@
 package com.marcinswiderski.buyingDutchman.agent.automaticBuyers;
 
-import java.math.BigDecimal;
+import com.marcinswiderski.buyingDutchman.agent.auctions.Auction;
+import com.marcinswiderski.buyingDutchman.agent.client.BDC;
+import com.marcinswiderski.buyingDutchman.agent.client.BuyingDutchmanAgent;
 
-import auctions.Auction;
-import buyingDutchmanClient.BDC;
-import buyingDutchmanClient.BuyingDutchmanAgent;
+import java.math.BigDecimal;
 
 public abstract class AutomaticBuyer implements AutomaticBuyerInterface {
 

@@ -1,6 +1,6 @@
 package com.marcinswiderski.buyingDutchman.agent.auctions;
 
-import buyingDutchmanClient.BDC.AuctionTypes;
+import com.marcinswiderski.buyingDutchman.agent.client.BDC.AuctionTypes;
 
 public class AuctionFactory implements AuctionFactoryInterface {
 	public Auction createAuction(AuctionDetails AD, AuctionItem AI, String AN, String Auctioneer) {

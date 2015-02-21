@@ -3,34 +3,34 @@ package com.marcinswiderski.buyingDutchman.agent.client;
 //TODO Po zako�czeniu aukcji poprawi� od�wie�anie jPAuctionCommand
 //TODO error.txt w katalogu magisterska
 //TODO brak historii bid�w dla aukcji drugiej ceny, dla holenderskiej. Dla angielskiej i przetarg�w jest ok.
-import java.io.IOException;
-import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.Vector;
-import java.util.Hashtable;
-import javax.swing.table.AbstractTableModel;
 
-import auctions.Auction;
-import auctions.AuctionPenny;
-import auctions.AutomaticBid;
-import auctions.Bid;
-import automaticBuyers.AutomaticBuyer;
-import automaticBuyers.AutomaticBuyerFactory;
-
+import com.marcinswiderski.buyingDutchman.agent.auctions.Auction;
+import com.marcinswiderski.buyingDutchman.agent.auctions.AuctionPenny;
+import com.marcinswiderski.buyingDutchman.agent.auctions.AutomaticBid;
+import com.marcinswiderski.buyingDutchman.agent.auctions.Bid;
+import com.marcinswiderski.buyingDutchman.agent.automaticBuyers.AutomaticBuyer;
+import com.marcinswiderski.buyingDutchman.agent.automaticBuyers.AutomaticBuyerFactory;
 import jade.core.AID;
 import jade.core.Agent;
 import jade.core.behaviours.CyclicBehaviour;
 import jade.core.behaviours.OneShotBehaviour;
 import jade.core.behaviours.TickerBehaviour;
 import jade.domain.DFService;
-import jade.domain.FIPAException;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
 import jade.domain.FIPAAgentManagement.ServiceDescription;
+import jade.domain.FIPAException;
 import jade.gui.GuiAgent;
 import jade.gui.GuiEvent;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.UnreadableException;
+
+import javax.swing.table.AbstractTableModel;
+import java.io.IOException;
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.Hashtable;
+import java.util.Iterator;
+import java.util.Vector;
 
 /**
  * Klasa implementuj�ca i umiejscawiaj�ca agenta w �rodowisku platformy
@@ -226,7 +226,7 @@ public class BuyingDutchmanAgent extends GuiAgent {
 				+ auctionNr);
 		if (a != null) {
 			AutomaticBuyer ab = AutomaticBuyerFactory.AutomaticBuyerInstance(
-					this, bid, upBid, rounds, a.getType());
+                    this, bid, upBid, rounds, a.getType());
 			if (ab != null) {
 				automaticBuyers.put(auctioneer + BDC.POSTFIX + auctionNr, ab);
 				if (!ab.performDuty(a))

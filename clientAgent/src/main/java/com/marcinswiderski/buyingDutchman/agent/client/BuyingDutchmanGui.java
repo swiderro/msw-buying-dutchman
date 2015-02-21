@@ -1,42 +1,20 @@
 package com.marcinswiderski.buyingDutchman.agent.client;
 
+import com.marcinswiderski.buyingDutchman.agent.auctions.Auction;
+import com.marcinswiderski.buyingDutchman.agent.auctions.AuctionDetails;
+import com.marcinswiderski.buyingDutchman.agent.auctions.AuctionFactory;
+import com.marcinswiderski.buyingDutchman.agent.auctions.AuctionItem;
+import com.marcinswiderski.buyingDutchman.agent.client.BDC.AuctionTypes;
 import jade.gui.GuiEvent;
 
-import java.awt.BorderLayout;
-import java.awt.Dimension;
-import java.awt.FlowLayout;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.ItemEvent;
-import java.awt.event.WindowEvent;
-import java.awt.event.WindowListener;
-
-import javax.swing.DefaultListSelectionModel;
-import javax.swing.JButton;
-import javax.swing.JComboBox;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTabbedPane;
-import javax.swing.JTable;
-import javax.swing.JTextArea;
-import javax.swing.JTextField;
-import javax.swing.ListSelectionModel;
+import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.PlainDocument;
-
-import buyingDutchmanClient.BDC.AuctionTypes;
-
-import auctions.Auction;
-import auctions.AuctionDetails;
-import auctions.AuctionFactory;
-import auctions.AuctionItem;
+import java.awt.*;
+import java.awt.event.*;
 
 
 public class BuyingDutchmanGui extends JFrame {
