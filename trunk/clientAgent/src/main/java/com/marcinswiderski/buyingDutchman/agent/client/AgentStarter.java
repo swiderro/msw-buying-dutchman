@@ -1,6 +1,6 @@
 package com.marcinswiderski.buyingDutchman.agent.client;
 
-import java.awt.EventQueue;
+import java.awt.*;
 
 /**
  * Klasa startowa dla modu�u agenta systemu Buying Dutchman. 

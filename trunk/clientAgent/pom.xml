@@ -2,10 +2,10 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.marcinswiderski.buyingDutchman</groupId>
-    <artifactId>mainContainer</artifactId>
+    <artifactId>clientAgent</artifactId>
     <packaging>jar</packaging>
     <version>1.0-SNAPSHOT</version>
-    <name>buyingDutchman_mainContainer</name>
+    <name>buyingDutchman_clientAgent</name>
     <url>http://maven.apache.org</url>
     <repositories>
         <repository>

@@ -1,8 +1,9 @@
 package com.marcinswiderski.buyingDutchman.agent.automaticBuyers;
 
+import com.marcinswiderski.buyingDutchman.agent.client.BDC;
+import com.marcinswiderski.buyingDutchman.agent.client.BuyingDutchmanAgent;
+
 import java.math.BigDecimal;
-import buyingDutchmanClient.BDC;
-import buyingDutchmanClient.BuyingDutchmanAgent;
 
 public class AutomaticBuyerFactory{
 	// klasa odpowiada za produkowanie obiekt�w obs�uguj�cych przyci�ni�cie guzika "Oczekuj i kup"

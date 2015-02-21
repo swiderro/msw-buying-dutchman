@@ -1,8 +1,8 @@
 package com.marcinswiderski.buyingDutchman.agent.auctions;
 
-import java.math.BigDecimal;
+import com.marcinswiderski.buyingDutchman.agent.client.BDC;
 
-import buyingDutchmanClient.BDC;
+import java.math.BigDecimal;
 
 public class AuctionDutch extends Auction {
 	public AuctionDutch(AuctionDetails AD, AuctionItem AI, String AN, String Auctioneer) {

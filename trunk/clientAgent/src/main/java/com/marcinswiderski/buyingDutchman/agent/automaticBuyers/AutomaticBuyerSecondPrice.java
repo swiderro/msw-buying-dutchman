@@ -1,11 +1,11 @@
 package com.marcinswiderski.buyingDutchman.agent.automaticBuyers;
 
-import java.math.BigDecimal;
+import com.marcinswiderski.buyingDutchman.agent.auctions.Auction;
+import com.marcinswiderski.buyingDutchman.agent.client.BDC;
+import com.marcinswiderski.buyingDutchman.agent.client.BDC.AuctionTypes;
+import com.marcinswiderski.buyingDutchman.agent.client.BuyingDutchmanAgent;
 
-import buyingDutchmanClient.BDC;
-import buyingDutchmanClient.BuyingDutchmanAgent;
-import buyingDutchmanClient.BDC.AuctionTypes;
-import auctions.Auction;
+import java.math.BigDecimal;
 
 public class AutomaticBuyerSecondPrice extends AutomaticBuyer {
 	private BigDecimal upBid;

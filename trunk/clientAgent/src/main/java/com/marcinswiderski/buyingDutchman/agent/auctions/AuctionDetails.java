@@ -1,9 +1,9 @@
 package com.marcinswiderski.buyingDutchman.agent.auctions;
 
-import java.io.Serializable;
+import com.marcinswiderski.buyingDutchman.agent.client.BDC;
+import com.marcinswiderski.buyingDutchman.agent.client.BDC.AuctionTypes;
 
-import buyingDutchmanClient.BDC;
-import buyingDutchmanClient.BDC.AuctionTypes;
+import java.io.Serializable;
 
 public class AuctionDetails implements Serializable{
 	private static final long serialVersionUID = 1L;

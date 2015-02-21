@@ -1,13 +1,12 @@
 package com.marcinswiderski.buyingDutchman.agent.automaticBuyers;
 
+import com.marcinswiderski.buyingDutchman.agent.auctions.Auction;
+import com.marcinswiderski.buyingDutchman.agent.client.BDC;
+import com.marcinswiderski.buyingDutchman.agent.client.BDC.AuctionTypes;
+import com.marcinswiderski.buyingDutchman.agent.client.BuyingDutchmanAgent;
 import jade.lang.acl.ACLMessage;
 
 import java.math.BigDecimal;
-
-import buyingDutchmanClient.BDC;
-import buyingDutchmanClient.BuyingDutchmanAgent;
-import buyingDutchmanClient.BDC.AuctionTypes;
-import auctions.Auction;
 //TODO sprawdzi�, czy jest u�ywane
 public class AutomaticBuyerPenny extends AutomaticBuyer {
 

@@ -1,10 +1,10 @@
 package com.marcinswiderski.buyingDutchman.agent.auctions;
 
+import com.marcinswiderski.buyingDutchman.agent.client.BDC;
+
 import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Vector;
-
-import buyingDutchmanClient.BDC;
 
 public class AuctionPenny extends Auction {
 	//TODO ? nie dzia�a poprawnie sk�adanie oferty dla tego typu aukcji. Do poprawy.

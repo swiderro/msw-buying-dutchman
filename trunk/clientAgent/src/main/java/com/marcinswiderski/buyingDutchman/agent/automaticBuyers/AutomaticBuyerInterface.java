@@ -1,6 +1,6 @@
 package com.marcinswiderski.buyingDutchman.agent.automaticBuyers;
 
-import auctions.Auction;
+import com.marcinswiderski.buyingDutchman.agent.auctions.Auction;
 
 public interface AutomaticBuyerInterface {
 

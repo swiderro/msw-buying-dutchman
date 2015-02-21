@@ -1,11 +1,11 @@
 package com.marcinswiderski.buyingDutchman.agent.auctions;
 
+import com.marcinswiderski.buyingDutchman.agent.client.BDC;
+import com.marcinswiderski.buyingDutchman.agent.client.BDC.AuctionTypes;
+
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.ArrayList;
-
-import buyingDutchmanClient.BDC;
-import buyingDutchmanClient.BDC.AuctionTypes;
 
 public abstract class Auction implements Serializable {
 	private static final long serialVersionUID = 1L;
@@ -24,9 +24,9 @@ public abstract class Auction implements Serializable {
 	protected BigDecimal bestBid;
 	private ArrayList bidsHistory;
 	/**
-	 * @param ad
-	 * @param ai
-	 * @param an
+	 * @param AD
+	 * @param AI
+	 * @param Auctioneer
 	 */
 	public Auction(AuctionDetails AD, AuctionItem AI, String AN, String Auctioneer) {
 		this.ad = AD;
