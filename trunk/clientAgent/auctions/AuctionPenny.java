@@ -2,13 +2,12 @@ package auctions;
 
 import java.math.BigDecimal;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Vector;
 
 import buyingDutchmanClient.BDC;
 
 public class AuctionPenny extends Auction {
-	//TODO ? nie dzia³a poprawnie sk³adanie oferty dla tego typu aukcji. Do poprawy.
+	//TODO ? nie dziaï¿½a poprawnie skï¿½adanie oferty dla tego typu aukcji. Do poprawy.
 	private HashMap<String, Vector<AutomaticBid>> automaticBids;
 
 	public AuctionPenny(AuctionDetails AD, AuctionItem AI, String AN,
@@ -69,7 +68,7 @@ public class AuctionPenny extends Auction {
 					}
 				}
 			}
-			//Okreœla, ile automatów w danym wykonaniu przd³u¿a³o aukcje. Jeœli nie ma konkurencji, koñczy aukcjê
+			//Okreï¿½la, ile automatï¿½w w danym wykonaniu przdï¿½uï¿½aï¿½o aukcje. Jeï¿½li nie ma konkurencji, koï¿½czy aukcjï¿½
 			if (usedBids<2)
 				setFinished(true);
 	}
