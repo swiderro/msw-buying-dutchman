@@ -1,0 +1,1 @@
+Buying Dutchman is a project made in the JADE environment. It implements auction platform for different kinds of auctions: dutch, english, second price, tender.
