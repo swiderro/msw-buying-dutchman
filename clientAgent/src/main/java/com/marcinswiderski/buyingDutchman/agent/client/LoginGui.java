@@ -29,17 +29,16 @@ public class LoginGui extends JFrame{
 	/**
 	 * Tytu� okna logowania.
 	 */
-	private static final String FRAMETITLE = "Buying Dutchman Login";  
-	
+	private static final String FRAME_TITLE = "Buying Dutchman Login";
+	public static final int DEFAULT_CLOSE_OPERATION = EXIT_ON_CLOSE;
+
 	//ELEMENTS
 	private JPanel jContentPane = null;
 	private JPanel jPAccount = null;
 	private JPanel jPAccountDetails = null;
 	private JPanel jPLogin = null;
-	private JLabel jLLogin = null;
 	/** Nazwa agenta, kt�ry ma zosta� utworzony. */
 	private JTextField jTFLogin = null;
-	private JLabel jLHost = null;
 	/** Nazwa hosta, na kt�rej jest uruchomiona platforma agentowa. */
 	private JTextField jTFHost = null;
 	private JButton jBLogin = null;
@@ -59,16 +58,8 @@ public class LoginGui extends JFrame{
 	/**
 	 * Nazwa pakietu, zawieraj�cego klas� agenta. U�ywana w celu utworzenia agenta.
 	 */
-	private static final String PACKAGENAME = "client";
+	private static final String PACKAGENAME = "com.marcinswiderski.buyingDutchman.agent.client";
 	private static final String SEPARATOR_2 = ".";
-	 	
-	/**
-	 * Konstruktor domy�lny. Wywo�uje super-konstruktor, nast�pnie wywo�uje metod� {@link #initialize()}.
-	 */
-	public LoginGui() {
-		super();
-		initialize();
-	}
 	
 	public LoginGui(String[] args) {
 		super();
@@ -103,9 +94,9 @@ public class LoginGui extends JFrame{
 	private void initialize() {
         this.setSize(new Dimension(FRAMEWIDTH, FRAMEHEIGHT));
         this.setContentPane(getJContentPane());
-        this.setTitle(FRAMETITLE);        
+        this.setTitle(FRAME_TITLE);
 		this.setResizable(false);
-		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		this.setDefaultCloseOperation(DEFAULT_CLOSE_OPERATION);
   	  	this.setVisible(true);
 	}
 	
@@ -132,7 +123,7 @@ public class LoginGui extends JFrame{
 		if (jPAccountDetails == null) {
 			FlowLayout flowLayout1 = new FlowLayout();
 			flowLayout1.setAlignment(java.awt.FlowLayout.LEFT);
-			jLHost = new JLabel();
+			JLabel jLHost = new JLabel();
 			jLHost.setText(HOSTLABEL);
 			jPAccountDetails = new JPanel();
 			jPAccountDetails.setLayout(flowLayout1);
@@ -146,7 +137,7 @@ public class LoginGui extends JFrame{
 		if (jPLogin == null) {
 			FlowLayout flowLayout = new FlowLayout();
 			flowLayout.setAlignment(java.awt.FlowLayout.LEFT);
-			jLLogin = new JLabel();
+			JLabel jLLogin = new JLabel();
 			jLLogin.setText(LOGINLABEL);
 			jPLogin = new JPanel();
 			jPLogin.setLayout(flowLayout);
@@ -229,7 +220,7 @@ public class LoginGui extends JFrame{
 	protected void connect() {
 		try {			
 			String login = jTFLogin.getText().trim();
-			if (login != null && login.length() > 0) {
+			if (login.length() > 0) {
 				try {
 	            	jade.Boot.main(getBootArguments());
 				}
